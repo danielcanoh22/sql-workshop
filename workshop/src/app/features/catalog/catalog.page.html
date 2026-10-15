@@ -1,0 +1,36 @@
+<section class="hero">
+  <div class="hero__inner">
+    <p class="hero__eyebrow">Workshop interactivo</p>
+    <h1>Aprende <span class="gradient">SQL</span> escribiendo consultas reales</h1>
+    <p class="hero__lead">
+      Primero el SQL que de verdad se usa en las aplicaciones y después lo mejor de PostgreSQL. Todo corre en tu
+      navegador sobre un PostgreSQL real: escribes la consulta, la ejecutas, ves los datos y comparas tu solución con
+      la recomendada.
+    </p>
+    <ul class="hero__facts">
+      <li><span class="material-symbols-outlined" aria-hidden="true">psychology</span>Concepto primero, consulta después</li>
+      <li><span class="material-symbols-outlined" aria-hidden="true">terminal</span>PostgreSQL real en el navegador</li>
+      <li><span class="material-symbols-outlined" aria-hidden="true">ads_click</span>Retos con pistas y corrección automática</li>
+    </ul>
+  </div>
+</section>
+
+<section class="catalog" aria-labelledby="catalog-heading">
+  <h2 id="catalog-heading" class="catalog__heading">Tutoriales</h2>
+  @for (section of sections(); track section.level) {
+    <section class="level-section" [attr.aria-labelledby]="'level-' + section.level">
+      <h3 class="level-section__title" [id]="'level-' + section.level">{{ section.title }}</h3>
+      <div class="grid">
+        @for (entry of section.entries; track entry.tutorial.slug) {
+          <app-tutorial-card
+            [tutorial]="entry.tutorial"
+            [status]="entry.status"
+            [percent]="entry.percent"
+            [minutes]="entry.minutes"
+            [link]="entry.link"
+          />
+        }
+      </div>
+    </section>
+  }
+</section>

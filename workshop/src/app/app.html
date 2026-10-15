@@ -1,0 +1,21 @@
+<mat-toolbar class="app-toolbar">
+  <a class="brand" routerLink="/" aria-label="SQL Workshop, ir al catálogo">
+    <span class="brand__mark" aria-hidden="true">SQL</span>
+    <span class="brand__name">SQL Workshop</span>
+  </a>
+  <span class="spacer"></span>
+  <button
+    matIconButton
+    type="button"
+    class="theme-toggle"
+    (click)="theme.toggle()"
+    [attr.aria-label]="theme.isDark() ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+    [attr.title]="theme.isDark() ? 'Tema claro' : 'Tema oscuro'"
+  >
+    <span class="material-symbols-outlined" aria-hidden="true">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
+  </button>
+</mat-toolbar>
+
+<main class="app-main">
+  <router-outlet />
+</main>

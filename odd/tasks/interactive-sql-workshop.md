@@ -1,0 +1,42 @@
+# Interactive SQL Workshop
+
+Objective: an interactive, browser-based workshop (Angular shell reused from the ASP.NET Core workshop) to learn practical SQL first and PostgreSQL second, running real Postgres in the browser with PGlite.
+Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo without remote, no PRs yet; work-unit commits on the feature branch) · Test runner: Vitest through the Angular unit-test builder (`bun run test`).
+
+## Specs
+
+- **S1 Engine.** PGlite for both parts. User: "Si me confirmas que podemos usar PGlite para todo, me parece bien." Known limits to disclose in content: single user/connection (no live demo of concurrent sessions), parallel workers disabled.
+- **S2 Scope.** User: "yo no quiero aprender absolutamente todo lo que existe en SQL, porque seguramente hay muchas cosas que ni se usan o tiene un caso de uso demasiado específico. Yo quiero aprender las cosas realmente importantes, que sean comunes y se utilicen mucho a la hora de trabajar con bases de datos para aplicaciones." Approved syllabus:
+  - Part 1 (general SQL): relational model (tables, PK/FK, basic types, NULL); SELECT + WHERE (IN, BETWEEN, LIKE, IS NULL); ORDER BY + LIMIT/OFFSET; aggregates + GROUP BY + HAVING; INNER and LEFT JOIN; subqueries, EXISTS, CTEs (WITH); INSERT/UPDATE/DELETE; CREATE/ALTER TABLE + constraints (NOT NULL, UNIQUE, CHECK, FK with ON DELETE); practical modeling (1:N, N:M, normalization); transactions; CASE, COALESCE, common text/date functions; indexes + first EXPLAIN.
+  - Part 2 (PostgreSQL): IDENTITY, UUID, timestamptz; RETURNING and ON CONFLICT (upsert); parameterized queries ($1) and SQL injection; window functions; JSONB; composite and partial indexes + EXPLAIN ANALYZE; views.
+  - Optional block at the end of Part 2: recursive CTEs, triggers, PL/pgSQL functions.
+  - Out on purpose (mentioned briefly where relevant): RIGHT/FULL/NATURAL JOIN in depth, cursors, MERGE, GRANT/permissions.
+- **S3 Catalog by level.** User: "Quiero sea sea como el que ya tenemos de .NET: cards organizadas por nivel de dificultad para ir aprendiendo progresivamente"
+- **S4 Visible data.** User: "Importante ver la data con la que estamos trabajando en cada nivel". Approved design: side panel with tables, columns, types, PK/FK, row preview and a relationship diagram from `information_schema`; refreshes after every executed statement.
+- **S5 Topic structure.** User: "Lo idea sería tener explicaciones de cada tema, ejemplo guiado paso a paso, retos con pistas ocultas (como en el de .NET). Eso podría ser para cada tema, quiero retos para cada cosa." Approved design: guided steps with editable, runnable SQL blocks; several challenges per topic with hidden hints and automatic checking against the expected result.
+- **S6 Capstones.** User: "Al final de todo quiero unos cuantos retos para construir ya un sistema completo que pueda representar la BD de una aplicación real que tenga bastantes cosas. Inicialmente el primer reto de estos puede ser guiado, para entender y aprender como construir algo complejo, y ya los otros pueden ser con pistas ocultas." Approved design: capstone 1 guided (e-commerce); capstones 2-4 with hints (proposed: bookings, course platform, multi-tenant SaaS); schemas checked by behavior (statements that must succeed/fail, cascades, index usage).
+- **S7 Best practices.** User: "todos los ejercicios deben seguir las mejores prácticas de SQL en cuanto a optimización de consultar y seguridad." Approved checklist: explicit column lists (no `SELECT *` in solutions), parameters instead of string concatenation, sargable predicates, indexes on FKs, constraints declared in the database, keyset pagination where relevant. A test runs every solution against its dataset.
+- **S8 Compare approaches.** User: "si hay ejercicios que se presten para hacerlos de varias formas diferentes pero hay una que es mejor que todas por X motivo, sería muy bueno poder ver eso. La for X es más mala porque esto pasa al ejecutar, la forma Y en cambio es mejor por... Y que todo sea interactivo." Approved design: `:::compare` block running variants side by side (same result?, EXPLAIN ANALYZE plan with scan types highlighted, rows, time as secondary metric) plus explanation; interactive SQL injection demo; "compare with the recommended solution" after solving a challenge.
+- **S9 In-browser SQL.** User (L1): "que pudiera escribir directamente el código SQL en el navegador para estudiar y practicar".
+- **S10 Vertical slice first.** Approved plan: shell + PGlite + editor + data panel + challenges + `:::compare` working end to end in one complete tutorial (SELECT/WHERE) before writing the rest of the content; checkpoint with the user after it.
+- Assumption (from the .NET workshop convention): tutorial text and UI in Spanish, all code and identifiers in English.
+
+## Tasks
+
+| ID | Specs | Route | Status | Evidence |
+| --- | --- | --- | --- | --- |
+| T1 Scaffold: copy Angular shell, rebrand, remove .NET content | S3 | inline | pending | |
+| T2 SQL engine: PGlite in a Web Worker, run/reset/seed/explain API, datasets | S1, S9 | inline | pending | |
+| T3 Runnable SQL blocks: CodeMirror editor, run button, result grid, errors | S9, S5 | inline | pending | |
+| T4 Data panel: schema, row preview, relationship diagram, auto-refresh | S4 | inline | pending | |
+| T5 Challenges with auto-check, hints, solution, compare-with-recommended | S5, S7, S8 | inline | pending | |
+| T6 `:::compare` block | S8 | inline | pending | |
+| T7 Vertical-slice tutorial SELECT/WHERE + dataset + solutions test | S2, S5, S7, S10 | inline | pending | |
+| T8 Checkpoint with the user on the vertical slice | S10 | — | pending | |
+| T9+ Remaining Part 1, Part 2, optional block, capstones (planned after T8) | S2, S6 | — | pending | |
+
+## Log
+
+- **L1 (2026-10-15, user):** "Quiero crear aquí un Workshop como el que tenemos en C:\Users\Daniel\Documents\Development\CSharp_NET-Workshop pero para aprender SQL. Primero quiero aprender SQL en general y luego pasar a PostgreSQL. La idea sería que el Workshop fuera interactivo y que pudiera escribir directamente el código SQL en el navegador para estudiar y practicar. ¿Cómo podríamos hacerlo?"
+- **L2 (2026-10-15):** Engine verified via PGlite docs: Postgres 18.3 WASM build, browser + Node, `PGliteWorker` available; single user/connection; `max_parallel_workers=0`. SQLite rejected (dynamic typing teaches habits Postgres rejects).
+- **L3 (2026-10-15, user):** "Arranca" — implementation authorized; start with the vertical slice (S10).
