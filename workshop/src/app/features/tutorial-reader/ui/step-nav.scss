@@ -92,3 +92,19 @@
   color: var(--mat-sys-tertiary);
   font-size: 1.6rem;
 }
+
+.step-link__challenges {
+  margin-left: auto;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface-variant);
+
+  &--done {
+    background: color-mix(in srgb, light-dark(#0b6b3a, #8fe0a8) 18%, transparent);
+    color: light-dark(#0b6b3a, #8fe0a8);
+  }
+}

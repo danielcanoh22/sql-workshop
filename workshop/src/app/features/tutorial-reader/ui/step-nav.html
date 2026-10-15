@@ -25,6 +25,16 @@
             <span class="step-link__num" aria-hidden="true">{{ i + 1 }}</span>
           }
           <span class="step-link__title">{{ step.title }}</span>
+          @if (step.challenges) {
+            @let solved = solvedChallenges()[step.id] ?? 0;
+            <span
+              class="step-link__challenges"
+              [class.step-link__challenges--done]="solved >= step.challenges"
+              [attr.aria-label]="solved + ' de ' + step.challenges + ' retos resueltos'"
+              [attr.title]="solved + ' de ' + step.challenges + ' retos resueltos'"
+              >{{ solved }}/{{ step.challenges }}</span
+            >
+          }
         </a>
       </li>
     }

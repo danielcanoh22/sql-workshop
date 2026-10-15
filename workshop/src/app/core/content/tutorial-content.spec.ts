@@ -41,6 +41,22 @@ describe.each(available.map((t) => [t.slug, t] as const))('tutorial %s', (slug, 
     expect(files.filter((file) => !existsSync(file))).toEqual([]);
   });
 
+  it('declares in the manifest how many auto-checked challenges each step has', () => {
+    const declared = tutorial.steps.map((step) => step.challenges ?? 0);
+    const actual = steps.map((step) => step.islands.filter((island) => island.name === 'challenge').length);
+
+    expect(declared).toEqual(actual);
+  });
+
+  it('gives every auto-checked challenge a title that is unique within its step (it keys the saved progress)', () => {
+    for (const step of steps) {
+      const titles = step.islands.filter((island) => island.name === 'challenge').map((island) => island.props['title']);
+
+      expect(titles.every((title) => typeof title === 'string' && title.length > 0), step.id).toBe(true);
+      expect(new Set(titles).size, step.id).toBe(titles.length);
+    }
+  });
+
   if (!tutorial.dataset) {
     it('declares no SQL blocks without a dataset', () => {
       expect(steps.flatMap((step) => step.islands)).toEqual([]);

@@ -1,5 +1,8 @@
 import { Component, input, output, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { STEP_CONTEXT, StepContext } from '../../../core/content/islands';
+import { ChallengeProgressService, challengeKey } from '../../../core/progress/challenge-progress.service';
+import { PROGRESS_STORAGE } from '../../../core/progress/progress.service';
 import { EngineStatus, SqlEngineService } from '../../../core/sql/sql-engine.service';
 import { CheckOutcome, CompareOutcome, SqlResultSet, SqlRunOutcome } from '../../../core/sql/sql.model';
 import { SqlEditor } from '../ui/sql-editor';
@@ -28,7 +31,14 @@ const PROPS = {
   starter: 'SELECT',
 };
 
-function setup(check: CheckOutcome, props: object = PROPS) {
+interface SetupOptions {
+  /** Step the challenge is rendered in; omitted, nothing is saved. */
+  readonly context?: StepContext;
+  /** Runs before the component is created, e.g. to simulate progress saved in a previous visit. */
+  readonly before?: (progress: ChallengeProgressService) => void;
+}
+
+function setup(check: CheckOutcome, props: object = PROPS, options: SetupOptions = {}) {
   const run: SqlRunOutcome = { ok: true, durationMs: 1, results: [names('Ana')] };
   const engine = {
     status: signal<EngineStatus>('ready'),
@@ -38,8 +48,16 @@ function setup(check: CheckOutcome, props: object = PROPS) {
     check: vi.fn().mockResolvedValue(check),
     compare: vi.fn(),
   };
-  TestBed.configureTestingModule({ providers: [{ provide: SqlEngineService, useValue: engine }] });
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: SqlEngineService, useValue: engine },
+      { provide: PROGRESS_STORAGE, useValue: null },
+      ...(options.context ? [{ provide: STEP_CONTEXT, useValue: signal(options.context) }] : []),
+    ],
+  });
   TestBed.overrideComponent(SqlChallenge, { remove: { imports: [SqlEditor] }, add: { imports: [FakeEditor] } });
+  const progress = TestBed.inject(ChallengeProgressService);
+  options.before?.(progress);
   const fixture = TestBed.createComponent(SqlChallenge);
   fixture.componentRef.setInput('props', props);
   fixture.detectChanges();
@@ -49,10 +67,81 @@ function setup(check: CheckOutcome, props: object = PROPS) {
     root.querySelector<HTMLButtonElement>(selector)!.click();
     await fixture.whenStable();
   };
-  return { fixture, root, engine, editor, click };
+  return { fixture, root, engine, editor, click, progress };
 }
 
 const CORRECT: CheckOutcome = { verdict: 'correct', message: '¡Correcto! Tu resultado coincide con el esperado.' };
+const WRONG: CheckOutcome = { verdict: 'values', message: 'Algunos valores no coinciden.' };
+
+describe('SqlChallenge progress', () => {
+  const context: StepContext = { slug: 'select-where', stepId: 'where-filters' };
+  const titled = { ...PROPS, title: 'Clientes de Madrid' };
+  const key = challengeKey('select-where', 'where-filters', 'Clientes de Madrid');
+
+  it('restores the last saved answer instead of the starter code', () => {
+    const { root } = setup(CORRECT, titled, { context, before: (p) => p.saveAnswer(key, 'SELECT saved') });
+
+    expect(root.querySelector('textarea')?.value).toBe('SELECT saved');
+  });
+
+  it('saves the answer while the learner types', () => {
+    const { editor, progress } = setup(CORRECT, titled, { context });
+
+    editor().codeChange.emit('SELECT typed');
+
+    expect(progress.answer(key)).toBe('SELECT typed');
+  });
+
+  it('marks the challenge as solved after a correct check, and only then', async () => {
+    const wrong = setup(WRONG, titled, { context });
+    await wrong.click('.challenge__check');
+    expect(wrong.progress.isSolved(key)).toBe(false);
+    expect(wrong.root.querySelector('.challenge__solved')).toBeNull();
+
+    TestBed.resetTestingModule();
+    const right = setup(CORRECT, titled, { context });
+    await right.click('.challenge__check');
+    right.fixture.detectChanges();
+    expect(right.progress.isSolved(key)).toBe(true);
+    expect(right.root.querySelector('.challenge__solved')?.textContent).toContain('Resuelto');
+  });
+
+  it('shows challenges solved in a previous visit as solved', () => {
+    const { root } = setup(CORRECT, titled, { context, before: (p) => p.markSolved(key) });
+
+    expect(root.querySelector('.challenge__solved')).not.toBeNull();
+  });
+
+  it('starts over from the starter code, forgetting the saved answer but not the solved mark', async () => {
+    const { fixture, root, editor, progress, click } = setup(CORRECT, titled, {
+      context,
+      before: (p) => {
+        p.saveAnswer(key, 'SELECT saved');
+        p.markSolved(key);
+      },
+    });
+
+    await click('.challenge__check');
+    await click('.challenge__restart');
+    fixture.detectChanges();
+
+    expect(editor().setCode).toHaveBeenCalledWith('SELECT');
+    expect(progress.answer(key)).toBeUndefined();
+    expect(progress.isSolved(key)).toBe(true);
+    expect(root.querySelector('.verdict')).toBeNull();
+    expect(root.querySelector('.challenge__restart')).toBeNull();
+  });
+
+  it('saves nothing outside a tutorial step', async () => {
+    const { editor, progress, click } = setup(CORRECT, titled);
+
+    editor().codeChange.emit('SELECT typed');
+    await click('.challenge__check');
+
+    expect(progress.answer(key)).toBeUndefined();
+    expect(progress.isSolved(key)).toBe(false);
+  });
+});
 
 describe('SqlChallenge', () => {
   it('starts from the starter code', () => {

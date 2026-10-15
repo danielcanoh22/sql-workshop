@@ -105,6 +105,7 @@ describe('workshop markdown blocks', () => {
 
       expect(island.name).toBe('challenge');
       expect(island.props).toEqual({
+        title: 'Clientes de Madrid',
         solutionSql: "SELECT first_name FROM customers WHERE city = 'Madrid' ORDER BY first_name;",
         ordered: true,
         starter: 'SELECT',
@@ -144,6 +145,7 @@ describe('workshop markdown blocks', () => {
       const [island] = islandsOf(render(markdown));
 
       expect(island.props).toEqual({
+        title: 'Desactivar clientes',
         solutionSql: 'UPDATE customers SET is_active = false WHERE city IS NULL;',
         verifySql: 'SELECT id, is_active FROM customers ORDER BY id;',
         setupSql:

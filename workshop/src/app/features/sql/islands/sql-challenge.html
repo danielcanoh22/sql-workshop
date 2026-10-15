@@ -2,6 +2,16 @@
   <header class="workbench__header">
     <span class="material-symbols-outlined workbench__icon" aria-hidden="true">edit_note</span>
     <span class="workbench__title">Tu respuesta</span>
+    @if (solved()) {
+      <span class="challenge__solved">
+        <span class="material-symbols-outlined" aria-hidden="true">verified</span>Resuelto
+      </span>
+    }
+    @if (canRestart()) {
+      <button type="button" class="challenge__restart" (click)="restart()" title="Volver al código inicial">
+        <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>Empezar de nuevo
+      </button>
+    }
     <button type="button" class="challenge__run" [disabled]="!ready() || !hasCode()" (click)="run()" title="Ctrl + Enter">
       <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>{{ busy() === 'run' ? 'Ejecutando…' : 'Ejecutar' }}
     </button>
@@ -11,10 +21,11 @@
   </header>
 
   <app-sql-editor
-    [code]="starter()"
+    #editor
+    [code]="initialCode()"
     [schema]="completion()"
     label="Tu respuesta al reto"
-    (codeChange)="code.set($event)"
+    (codeChange)="edit($event)"
     (runRequested)="run()"
   />
 

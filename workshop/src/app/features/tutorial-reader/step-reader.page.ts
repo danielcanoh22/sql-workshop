@@ -1,12 +1,24 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  forwardRef,
+  inject,
+  input,
+  signal,
+  untracked,
+  viewChild,
+} from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavContent, MatSidenavModule } from '@angular/material/sidenav';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { ContentService } from '../../core/content/content.service';
-import { MARKDOWN_ISLANDS } from '../../core/content/islands';
+import { MARKDOWN_ISLANDS, STEP_CONTEXT } from '../../core/content/islands';
+import { ChallengeProgressService } from '../../core/progress/challenge-progress.service';
 import { ProgressService } from '../../core/progress/progress.service';
 import { SqlEngineService } from '../../core/sql/sql-engine.service';
 import { DataPanel } from '../sql/data-panel/data-panel';
@@ -25,13 +37,17 @@ import { StepNav } from './ui/step-nav';
   imports: [RouterLink, MatButtonModule, MatSidenavModule, MarkdownView, NotFoundMessage, StepNav, DataPanel],
   templateUrl: './step-reader.page.html',
   styleUrl: './step-reader.page.scss',
-  providers: [{ provide: MARKDOWN_ISLANDS, useValue: SQL_ISLANDS }],
+  providers: [
+    { provide: MARKDOWN_ISLANDS, useValue: SQL_ISLANDS },
+    { provide: STEP_CONTEXT, useFactory: () => inject(forwardRef(() => StepReaderPage)).stepContext },
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StepReaderPage {
   private readonly content = inject(ContentService);
   private readonly progress = inject(ProgressService);
   private readonly sqlEngine = inject(SqlEngineService);
+  private readonly challengeProgress = inject(ChallengeProgressService);
 
   readonly slug = input.required<string>();
   readonly stepId = input.required<string>();
@@ -45,6 +61,15 @@ export class StepReaderPage {
   protected readonly total = computed(() => this.tutorial()?.steps.length ?? 0);
   protected readonly neighbours = computed(() => this.content.getNeighbours(this.slug(), this.stepId()));
   protected readonly minutes = computed(() => formatMinutes(this.step()?.estimatedMinutes ?? 0));
+
+  /** Read by the islands of this step (see `STEP_CONTEXT`). */
+  readonly stepContext = computed(() => ({ slug: this.slug(), stepId: this.stepId() }));
+
+  protected readonly solvedChallenges = computed<Record<string, number>>(() =>
+    Object.fromEntries(
+      (this.tutorial()?.steps ?? []).map((step) => [step.id, this.challengeProgress.solvedCount(this.slug(), step.id)]),
+    ),
+  );
 
   protected readonly completedIds = computed(() => this.progress.completedSteps(this.slug())());
   protected readonly isDone = computed(() => this.completedIds().includes(this.stepId()));

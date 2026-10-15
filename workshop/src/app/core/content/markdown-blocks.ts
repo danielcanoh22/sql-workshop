@@ -74,6 +74,8 @@ interface ContainerToken extends Tokens.Generic {
 }
 
 export interface ChallengeIslandProps {
+  /** Identifies the challenge for saved progress, together with the tutorial and the step. */
+  readonly title?: string;
   readonly solutionSql: string;
   readonly ordered?: boolean;
   readonly verifySql?: string;
@@ -165,6 +167,7 @@ function extractChallengeCheck(token: ContainerToken): ChallengeIslandProps | un
   if (!fence) return undefined;
 
   return {
+    ...(token.titleText ? { title: token.titleText } : {}),
     solutionSql: fence.text,
     ...(parseInfoString(fence.lang).flags.has('ordered') ? { ordered: true } : {}),
     ...(hidden.verify !== undefined ? { verifySql: hidden.verify } : {}),

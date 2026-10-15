@@ -1,6 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+  untracked,
+  viewChild,
+} from '@angular/core';
 import { ChallengeIslandProps } from '../../../core/content/markdown-blocks';
-import { IslandComponent } from '../../../core/content/islands';
+import { IslandComponent, STEP_CONTEXT } from '../../../core/content/islands';
+import { ChallengeProgressService, challengeKey } from '../../../core/progress/challenge-progress.service';
 import { SchemaStore } from '../../../core/sql/schema.store';
 import { SqlEngineService } from '../../../core/sql/sql-engine.service';
 import { CheckOutcome, CheckSpec, SqlResultSet, SqlRunOutcome } from '../../../core/sql/sql.model';
@@ -24,10 +35,31 @@ export class SqlChallenge implements IslandComponent<ChallengeIslandProps> {
   readonly props = input.required<ChallengeIslandProps>();
 
   private readonly engine = inject(SqlEngineService);
+  private readonly progress = inject(ChallengeProgressService);
+  private readonly stepContext = inject(STEP_CONTEXT, { optional: true });
+  // Queried by template reference so the editor can be swapped (e.g. in tests) without changing this component.
+  private readonly editor = viewChild.required<Pick<SqlEditor, 'setCode'>>('editor');
+
+  /** Progress is saved only for titled challenges rendered inside a tutorial step. */
+  private readonly key = computed(() => {
+    const context = this.stepContext?.();
+    const title = this.props().title;
+    return context && title ? challengeKey(context.slug, context.stepId, title) : undefined;
+  });
 
   protected readonly completion = inject(SchemaStore).completion;
   protected readonly starter = computed(() => this.props().starter ?? '');
-  protected readonly code = linkedSignal(() => this.starter());
+  /** What the editor shows when it opens: the answer saved in a previous visit, or the starter code. */
+  protected readonly initialCode = computed(() => {
+    const key = this.key();
+    return (key && untracked(() => this.progress.answer(key))) ?? this.starter();
+  });
+  protected readonly code = linkedSignal(() => this.initialCode());
+  protected readonly solved = computed(() => {
+    const key = this.key();
+    return !!key && this.progress.isSolved(key);
+  });
+  protected readonly canRestart = computed(() => this.code() !== this.starter());
   protected readonly busy = signal<'run' | 'check' | 'compare' | undefined>(undefined);
   protected readonly runOutcome = signal<{ sql: string; result: SqlRunOutcome } | undefined>(undefined);
   protected readonly check = signal<{ sql: string; outcome: CheckOutcome } | undefined>(undefined);
@@ -60,10 +92,35 @@ export class SqlChallenge implements IslandComponent<ChallengeIslandProps> {
     this.busy.set('check');
     this.comparison.set(undefined);
     try {
-      this.check.set({ sql, outcome: await this.engine.check(sql, spec) });
+      const outcome = await this.engine.check(sql, spec);
+      this.check.set({ sql, outcome });
+      const key = this.key();
+      if (outcome.verdict === 'correct' && key) {
+        this.progress.markSolved(key);
+      }
     } finally {
       this.busy.set(undefined);
     }
+  }
+
+  protected edit(sql: string): void {
+    this.code.set(sql);
+    const key = this.key();
+    if (!key) return;
+    if (sql === this.starter()) {
+      this.progress.clearAnswer(key);
+    } else {
+      this.progress.saveAnswer(key, sql);
+    }
+  }
+
+  /** Back to the starter code. The challenge stays solved: what was learned is not undone. */
+  protected restart(): void {
+    this.editor().setCode(this.starter());
+    this.edit(this.starter());
+    this.runOutcome.set(undefined);
+    this.check.set(undefined);
+    this.comparison.set(undefined);
   }
 
   /** After a correct answer: how much work did it take compared with the recommended solution? */

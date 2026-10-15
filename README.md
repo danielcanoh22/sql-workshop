@@ -30,7 +30,8 @@ bun run build        # production build in workshop/dist
 
 1. **Content**: create `workshop/public/tutorials/<slug>/` with `overview.md` and one file per step (`01-some-step.md`, ...).
 2. **Manifest**: create `workshop/src/app/core/content/manifests/<slug>.manifest.ts` exporting a `TutorialManifest`
-   (slug, number, title, subtitle, summary, level, estimatedMinutes, topics, `status: 'available'`, steps `{ id, title, file, estimatedMinutes }`)
+   (slug, number, title, subtitle, summary, level, estimatedMinutes, topics, `status: 'available'`, `dataset`,
+   steps `{ id, title, file, estimatedMinutes, challenges }` where `challenges` is the number of auto-checked challenges)
    and remove its placeholder from `coming-soon.manifests.ts`.
 3. **Register**: add ONE line to the array in `workshop/src/app/core/content/registry.ts`.
 
@@ -89,4 +90,6 @@ SELECT name FROM customers;
 - Highlighted languages: `sql`, `json`, `bash`.
 - Markdown is trusted content (sanitization is disabled on purpose), so never render untrusted input with this engine.
 
-Progress is stored in `localStorage` (`sql-workshop.progress.v1`), the theme in `sql-workshop.theme.v1`.
+Progress is stored in `localStorage`: completed steps in `sql-workshop.progress.v1`; solved challenges and the last
+answer of each challenge in `sql-workshop.challenges.v1`, keyed by `<tutorial>/<step>/<challenge title>` (so challenge
+titles must be unique within a step, and renaming one forgets its progress). The theme is in `sql-workshop.theme.v1`.

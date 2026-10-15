@@ -1,8 +1,8 @@
 import { TutorialManifest, TutorialStep } from '../tutorial.model';
 
-function step(number: number, id: string, title: string, estimatedMinutes: number): TutorialStep {
+function step(number: number, id: string, title: string, estimatedMinutes: number, challenges: number): TutorialStep {
   const prefix = String(number).padStart(2, '0');
-  return { id, title, file: `${prefix}-${id}.md`, estimatedMinutes };
+  return { id, title, file: `${prefix}-${id}.md`, estimatedMinutes, challenges };
 }
 
 export const SELECT_WHERE: TutorialManifest = {
@@ -22,10 +22,10 @@ export const SELECT_WHERE: TutorialManifest = {
     'Las consultas de lectura que usa cualquier aplicación: listados con las columnas justas, filtros por ' +
     'varios criterios y búsquedas por texto, escritas como las escribiría un profesional.',
   steps: [
-    step(1, 'select-basics', 'Tu primer SELECT', 20),
-    step(2, 'where-filters', 'Filtrar filas con WHERE', 25),
-    step(3, 'in-between-like', 'IN, BETWEEN y LIKE', 30),
-    step(4, 'null-values', 'NULL: el valor desconocido', 20),
-    step(5, 'practice', 'Práctica final', 30),
+    step(1, 'select-basics', 'Tu primer SELECT', 20, 4),
+    step(2, 'where-filters', 'Filtrar filas con WHERE', 25, 4),
+    step(3, 'in-between-like', 'IN, BETWEEN y LIKE', 30, 5),
+    step(4, 'null-values', 'NULL: el valor desconocido', 20, 3),
+    step(5, 'practice', 'Práctica final', 30, 4),
   ],
 };

@@ -6,6 +6,8 @@ import { provideRouter } from '@angular/router';
 import { TUTORIAL_MANIFESTS } from '../../core/content/content.service';
 import { provideWorkshopMarkdown } from '../../core/content/markdown.providers';
 import { TutorialManifest } from '../../core/content/tutorial.model';
+import { STEP_CONTEXT } from '../../core/content/islands';
+import { ChallengeProgressService, challengeKey } from '../../core/progress/challenge-progress.service';
 import { PROGRESS_STORAGE, ProgressService } from '../../core/progress/progress.service';
 import { SqlEngineService } from '../../core/sql/sql-engine.service';
 import { StepReaderPage } from './step-reader.page';
@@ -22,7 +24,7 @@ const TUTORIAL: TutorialManifest = {
   status: 'available',
   dataset: 'shop',
   steps: [
-    { id: 'a', title: 'Primer paso', file: '01-a.md', estimatedMinutes: 10 },
+    { id: 'a', title: 'Primer paso', file: '01-a.md', estimatedMinutes: 10, challenges: 2 },
     { id: 'b', title: 'Segundo paso', file: '02-b.md', estimatedMinutes: 20 },
     { id: 'c', title: 'Tercer paso', file: '03-c.md', estimatedMinutes: 15 },
   ],
@@ -110,6 +112,26 @@ describe('StepReaderPage', () => {
     expect(root.querySelector('.reader__minutes')?.textContent).toContain('20 min');
     expect(root.querySelector('.markdown-body h1')?.textContent).toBe('Hola');
     expect(root.querySelector('aside.callout--tip')).not.toBeNull();
+  });
+
+  it('tells the islands which tutorial step they are in', async () => {
+    const { open } = setup();
+
+    const { fixture } = await open('bookshelf', 'b', 'Texto');
+
+    expect(fixture.debugElement.injector.get(STEP_CONTEXT)()).toEqual({ slug: 'bookshelf', stepId: 'b' });
+  });
+
+  it('shows how many challenges of each step are solved in the table of contents', async () => {
+    const { open } = setup();
+    TestBed.inject(ChallengeProgressService).markSolved(challengeKey('bookshelf', 'a', 'Un reto'));
+
+    const { root } = await open('bookshelf', 'b', 'Texto');
+    const counts = [...root.querySelectorAll('.step-link')].map((link) => link.querySelector('.step-link__challenges'));
+
+    expect(counts[0]?.textContent?.trim()).toBe('1/2');
+    expect(counts[0]?.getAttribute('aria-label')).toBe('1 de 2 retos resueltos');
+    expect(counts[1]).toBeNull();
   });
 
   it('records the step as last visited', async () => {

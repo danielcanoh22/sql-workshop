@@ -16,6 +16,8 @@ export class StepNav {
   readonly currentId = input<string>();
   readonly completed = input<readonly string[]>([]);
   readonly percent = input(0);
+  /** Solved auto-checked challenges by step id. */
+  readonly solvedChallenges = input<Readonly<Record<string, number>>>({});
   /** Emitted when a step link is chosen (lets the host close a mobile drawer). */
   readonly picked = output<void>();
 }

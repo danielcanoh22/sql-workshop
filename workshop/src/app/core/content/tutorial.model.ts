@@ -8,6 +8,8 @@ export interface TutorialStep {
   /** Markdown file name inside `/tutorials/<slug>/` (e.g. `01-what-is-a-database.md`). */
   readonly file: string;
   readonly estimatedMinutes: number;
+  /** Number of auto-checked challenges in the step (verified against the Markdown by the content spec). */
+  readonly challenges?: number;
 }
 
 export interface TutorialManifest {
