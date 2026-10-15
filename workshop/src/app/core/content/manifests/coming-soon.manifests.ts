@@ -25,13 +25,6 @@ function comingSoon(
 /** Planned syllabus. Each entry becomes its own manifest file once its content exists. */
 export const COMING_SOON: readonly TutorialManifest[] = [
   // Part 1: general SQL
-  comingSoon(1, 'relational-model', 'El modelo relacional', 'Tablas, filas, claves y el famoso NULL', 'beginner', [
-    'Tablas',
-    'Primary key',
-    'Foreign key',
-    'Tipos de datos',
-    'NULL',
-  ]),
   comingSoon(3, 'order-limit', 'Ordenar y paginar', 'ORDER BY, LIMIT y OFFSET: así pagina una app', 'beginner', [
     'ORDER BY',
     'LIMIT',
