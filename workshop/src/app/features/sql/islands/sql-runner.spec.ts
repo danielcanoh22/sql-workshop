@@ -56,6 +56,15 @@ describe('SqlRunner', () => {
     expect(editor().schema()).toEqual({ customers: ['city'] });
   });
 
+  it('warns that an example fails on purpose', () => {
+    const plain = setup();
+    expect(plain.root.querySelector('.runner__expected-error')).toBeNull();
+
+    TestBed.resetTestingModule();
+    const failing = setup('ready', { code: 'INSERT INTO t VALUES (1);', expectError: true });
+    expect(failing.root.querySelector('.runner__expected-error')?.textContent).toContain('Error esperado');
+  });
+
   it('runs the current code and shows the result', async () => {
     const { fixture, root, engine, editor, runButton } = setup();
 

@@ -19,6 +19,7 @@ import type { MarkedExtension, RendererThis, Token, TokenizerThis, Tokens } from
  *
  *   ```sql title="queries/top-customers.sql"   -> filename header above the block
  *   ```sql run title="Optional caption"         -> editable SQL block with a Run button (an interactive island)
+ *   ```sql run error                             -> same, for an example that fails on purpose
  *
  * A container closes on the first line made of exactly the same number of colons that opened it.
  */
@@ -332,7 +333,11 @@ function renderCode({ text, lang }: Tokens.Code): string {
   const code = text.replace(/\n$/, '');
 
   if (language === 'sql' && flags.has('run')) {
-    return islandHtml('runner', title ? { code, title } : { code });
+    return islandHtml('runner', {
+      code,
+      ...(title ? { title } : {}),
+      ...(flags.has('error') ? { expectError: true } : {}),
+    });
   }
   const languageClass = language ? ` class="language-${escapeHtml(language)}"` : '';
   const pre = `<pre><code${languageClass}>${escapeHtml(code)}\n</code></pre>`;

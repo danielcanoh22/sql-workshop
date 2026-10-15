@@ -2,6 +2,11 @@
   <header class="runner__header">
     <span class="material-symbols-outlined runner__icon" aria-hidden="true">terminal</span>
     <span class="runner__title">{{ props().title ?? 'Pruébalo' }}</span>
+    @if (props().expectError) {
+      <span class="runner__expected-error" title="Este ejemplo produce un error a propósito">
+        <span class="material-symbols-outlined" aria-hidden="true">science</span>Error esperado
+      </span>
+    }
     @if (edited()) {
       <button type="button" class="runner__restore" (click)="restore()">
         <span class="material-symbols-outlined" aria-hidden="true">undo</span>Restaurar

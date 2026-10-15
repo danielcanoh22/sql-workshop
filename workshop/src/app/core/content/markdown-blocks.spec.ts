@@ -377,6 +377,16 @@ describe('workshop markdown blocks', () => {
       expect(JSON.parse(island.dataset['props']!)).toEqual({ code: 'SELECT 1;', title: 'Clientes de Madrid' });
     });
 
+    it('marks runnable fences that fail on purpose with ```sql run error', () => {
+      const [island] = islands(render('```sql run error title="Un email repetido"\nINSERT INTO t VALUES (1);\n```'));
+
+      expect(JSON.parse(island.dataset['props']!)).toEqual({
+        code: 'INSERT INTO t VALUES (1);',
+        title: 'Un email repetido',
+        expectError: true,
+      });
+    });
+
     it('leaves a plain ```sql fence as a static highlighted block', () => {
       const html = render('```sql\nSELECT 1;\n```');
 

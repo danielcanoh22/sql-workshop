@@ -9,6 +9,8 @@ import { SqlEditor } from '../ui/sql-editor';
 export interface SqlRunnerProps {
   readonly code: string;
   readonly title?: string;
+  /** The example fails on purpose (e.g. to show a constraint protecting the data). */
+  readonly expectError?: boolean;
 }
 
 /** Island for ```sql run fences: an editable query, a Run button and its result, on the tutorial playground. */

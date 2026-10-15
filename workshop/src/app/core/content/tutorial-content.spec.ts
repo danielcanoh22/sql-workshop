@@ -74,11 +74,15 @@ describe.each(available.map((t) => [t.slug, t] as const))('tutorial %s', (slug, 
 
   afterAll(() => engine?.dispose());
 
-  it.each(of('runner'))('runnable block in %s runs: %j', async (_step, props) => {
+  it.each(of('runner'))('runnable block in %s behaves as announced: %j', async (_step, props) => {
     await engine.reset();
     const outcome = await engine.run(String(props['code']));
 
-    expect(outcome.ok ? 'ok' : outcome.error.message).toBe('ok');
+    if (props['expectError']) {
+      expect(outcome.ok, 'a block marked `error` must fail').toBe(false);
+    } else {
+      expect(outcome.ok ? 'ok' : outcome.error.message).toBe('ok');
+    }
   });
 
   it.each(of('challenge'))('challenge solution in %s passes its own check: %j', async (_step, raw) => {
