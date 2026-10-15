@@ -1,4 +1,5 @@
 import { COMING_SOON } from './manifests/coming-soon.manifests';
+import { JOINS } from './manifests/joins.manifest';
 import { AGGREGATES_GROUP_BY } from './manifests/aggregates-group-by.manifest';
 import { ORDER_LIMIT } from './manifests/order-limit.manifest';
 import { RELATIONAL_MODEL } from './manifests/relational-model.manifest';
@@ -16,6 +17,7 @@ export const TUTORIAL_REGISTRY: readonly TutorialManifest[] = [
   SELECT_WHERE,
   ORDER_LIMIT,
   AGGREGATES_GROUP_BY,
+  JOINS,
   ...COMING_SOON,
 ];
 

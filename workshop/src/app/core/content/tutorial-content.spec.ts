@@ -116,5 +116,5 @@ describe.each(available.map((t) => [t.slug, t] as const))('tutorial %s', (slug, 
       expect(others.every((p) => pages[best] <= p), `best reads the fewest pages: ${pages}`).toBe(true);
       expect(Math.max(...others), `best is clearly better than the worst: ${pages}`).toBeGreaterThan(pages[best] * 2);
     }
-  });
+  }, 60_000); // setups generate hundreds of thousands of rows
 });
