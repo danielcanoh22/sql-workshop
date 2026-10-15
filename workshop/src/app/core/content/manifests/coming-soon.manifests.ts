@@ -25,13 +25,6 @@ function comingSoon(
 /** Planned syllabus. Each entry becomes its own manifest file once its content exists. */
 export const COMING_SOON: readonly TutorialManifest[] = [
   // Part 1: general SQL
-  comingSoon(4, 'aggregates-group-by', 'Agregaciones y GROUP BY', 'Contar, sumar y resumir datos por grupos', 'beginner', [
-    'COUNT',
-    'SUM',
-    'AVG',
-    'GROUP BY',
-    'HAVING',
-  ]),
   comingSoon(5, 'joins', 'JOINs', 'Combinar tablas con INNER y LEFT JOIN', 'beginner', ['INNER JOIN', 'LEFT JOIN']),
   comingSoon(6, 'subqueries-ctes', 'Subconsultas y CTEs', 'Consultas dentro de consultas, EXISTS y WITH', 'intermediate', [
     'Subqueries',
