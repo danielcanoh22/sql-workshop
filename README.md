@@ -62,6 +62,11 @@ SELECT name FROM customers;
 ````
 
 - Code fences accept `title="path/file.sql"` to show a filename header. Every code block has a copy button.
+- ```` ```sql run ```` (optionally `title="Caption"`) renders an editable SQL block with a **Ejecutar** button
+  (Ctrl/Cmd + Enter) that runs against the tutorial playground. Set `dataset` in the manifest to load
+  `workshop/public/datasets/<dataset>.sql`; the playground keeps the learner's changes while they stay in the tutorial.
+- Interactive blocks are "islands": the renderer emits a `data-island` placeholder and `MarkdownView` mounts the
+  component registered in `features/sql/islands/sql-islands.ts`.
 - Highlighted languages: `sql`, `json`, `bash`.
 - Markdown is trusted content (sanitization is disabled on purpose), so never render untrusted input with this engine.
 

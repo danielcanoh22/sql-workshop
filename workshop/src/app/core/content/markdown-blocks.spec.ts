@@ -196,4 +196,34 @@ describe('workshop markdown blocks', () => {
       expect(html).toContain('&lt;script&gt;.cs');
     });
   });
+
+  describe('runnable SQL fences', () => {
+    function islands(html: string): HTMLElement[] {
+      const host = document.createElement('div');
+      host.innerHTML = html;
+      return [...host.querySelectorAll<HTMLElement>('[data-island]')];
+    }
+
+    it('turns ```sql run into a runner island carrying the code instead of a static block', () => {
+      const html = render('```sql run\nSELECT name\nFROM customers\nWHERE name <> \'"x"\';\n```');
+      const [island] = islands(html);
+
+      expect(island.dataset['island']).toBe('runner');
+      expect(JSON.parse(island.dataset['props']!)).toEqual({ code: 'SELECT name\nFROM customers\nWHERE name <> \'"x"\';' });
+      expect(html).not.toContain('<pre>');
+    });
+
+    it('keeps the title of a runnable fence', () => {
+      const [island] = islands(render('```sql run title="Clientes de Madrid"\nSELECT 1;\n```'));
+
+      expect(JSON.parse(island.dataset['props']!)).toEqual({ code: 'SELECT 1;', title: 'Clientes de Madrid' });
+    });
+
+    it('leaves a plain ```sql fence as a static highlighted block', () => {
+      const html = render('```sql\nSELECT 1;\n```');
+
+      expect(islands(html)).toHaveLength(0);
+      expect(html).toContain('<code class="language-sql">SELECT 1;\n</code>');
+    });
+  });
 });

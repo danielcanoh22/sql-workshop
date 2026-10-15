@@ -18,6 +18,7 @@ import type { MarkedExtension, RendererThis, Token, TokenizerThis, Tokens } from
  *   ::::
  *
  *   ```sql title="queries/top-customers.sql"   -> filename header above the block
+ *   ```sql run title="Optional caption"         -> editable SQL block with a Run button (an interactive island)
  *
  * A container closes on the first line made of exactly the same number of colons that opened it.
  */
@@ -167,18 +168,47 @@ const COPY_BUTTON =
   '<button type="button" class="code-block__copy" data-copy aria-label="Copiar código">' +
   `${icon('content_copy', 'code-block__copy-icon')}<span class="code-block__copy-label">Copiar</span></button>`;
 
-/** Splits a fence info string such as `sql title="queries/top-customers.sql"`. */
-function parseInfoString(info: string | undefined): { language: string; title: string | undefined } {
+interface InfoString {
+  readonly language: string;
+  readonly title: string | undefined;
+  /** Bare words after the language, e.g. `run` in `sql run title="..."`. */
+  readonly flags: ReadonlySet<string>;
+}
+
+/** Splits a fence info string such as `sql run title="queries/top-customers.sql"`. */
+export function parseInfoString(info: string | undefined): InfoString {
   const trimmed = (info ?? '').trim();
   const language = /^\S*/.exec(trimmed)?.[0] ?? '';
   const title = /\btitle="([^"]*)"/.exec(trimmed)?.[1];
-  return { language, title };
+  const flags = new Set(
+    trimmed
+      .slice(language.length)
+      .replace(/\b\w+="[^"]*"/g, '')
+      .split(/\s+/)
+      .filter(Boolean),
+  );
+  return { language, title, flags };
+}
+
+/**
+ * Placeholder for an interactive Angular component ("island"). The renderer only produces HTML, so the component
+ * is mounted on this element after rendering (see `MarkdownView`). Props travel as JSON in `data-props`.
+ */
+export function islandHtml(name: string, props: object): string {
+  const safeName = escapeHtml(name);
+  const json = escapeHtml(JSON.stringify(props));
+  return `<div class="island island--${safeName}" data-island="${safeName}" data-props="${json}"></div>\n`;
 }
 
 function renderCode({ text, lang }: Tokens.Code): string {
-  const { language, title } = parseInfoString(lang);
+  const { language, title, flags } = parseInfoString(lang);
+  const code = text.replace(/\n$/, '');
+
+  if (language === 'sql' && flags.has('run')) {
+    return islandHtml('runner', title ? { code, title } : { code });
+  }
   const languageClass = language ? ` class="language-${escapeHtml(language)}"` : '';
-  const pre = `<pre><code${languageClass}>${escapeHtml(text.replace(/\n$/, ''))}\n</code></pre>`;
+  const pre = `<pre><code${languageClass}>${escapeHtml(code)}\n</code></pre>`;
 
   if (title) {
     return (

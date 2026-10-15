@@ -1,0 +1,57 @@
+@if (error(); as error) {
+  <div class="result result--error" role="alert">
+    <p class="result__error-title">
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>Error
+      @if (errorLocation(); as location) {
+        <span class="result__location">Línea {{ location.line }}, columna {{ location.column }}</span>
+      }
+    </p>
+    <p class="result__message">{{ error.message }}</p>
+    @if (error.detail) {
+      <p class="result__detail">{{ error.detail }}</p>
+    }
+    @if (error.hint) {
+      <p class="result__hint"><strong>Sugerencia:</strong> {{ error.hint }}</p>
+    }
+  </div>
+} @else {
+  @for (block of blocks(); track $index) {
+    @if (block.result.columns.length > 0) {
+      <div class="result">
+        @if (block.result.rows.length === 0) {
+          <p class="result__empty">La consulta devolvió 0 filas.</p>
+        } @else {
+          <div class="result__scroll" tabindex="0" role="region" aria-label="Resultado de la consulta">
+            <table class="result__table">
+              <thead>
+                <tr>
+                  @for (column of block.result.columns; track $index) {
+                    <th scope="col">{{ column.name }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of block.visibleRows; track $index) {
+                  <tr>
+                    @for (value of row; track $index) {
+                      <td [class.cell--null]="value === null">{{ format(value) }}</td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (block.result.rows.length > maxRows) {
+            <p class="result__truncated">Mostrando {{ maxRows }} de {{ block.result.rows.length }} filas.</p>
+          }
+        }
+        <p class="result__summary">{{ rowsText(block.result.rows.length) }} · {{ durationText() }}</p>
+      </div>
+    } @else {
+      <p class="result__command">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span
+        ><span class="result__command-text">{{ commandText(block.result) }}</span>
+      </p>
+    }
+  }
+}

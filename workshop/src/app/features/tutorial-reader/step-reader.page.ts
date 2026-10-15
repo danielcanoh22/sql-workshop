@@ -6,23 +6,31 @@ import { MatSidenavContent, MatSidenavModule } from '@angular/material/sidenav';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { ContentService } from '../../core/content/content.service';
+import { MARKDOWN_ISLANDS } from '../../core/content/islands';
 import { ProgressService } from '../../core/progress/progress.service';
+import { SqlEngineService } from '../../core/sql/sql-engine.service';
+import { SQL_ISLANDS } from '../sql/islands/sql-islands';
 import { formatMinutes } from '../../shared/format/duration';
 import { MarkdownView } from '../../shared/ui/markdown-view/markdown-view';
 import { NotFoundMessage } from '../../shared/ui/not-found-message/not-found-message';
 import { StepNav } from './ui/step-nav';
 
-/** Smart page for `/tutorials/:slug/:stepId`: sidebar TOC, rendered step, completion and navigation. */
+/**
+ * Smart page for `/tutorials/:slug/:stepId`: sidebar TOC, rendered step, completion and navigation.
+ * It opens the tutorial dataset in the SQL engine and lets the step Markdown mount the interactive SQL islands.
+ */
 @Component({
   selector: 'app-step-reader-page',
   imports: [RouterLink, MatButtonModule, MatSidenavModule, MarkdownView, NotFoundMessage, StepNav],
   templateUrl: './step-reader.page.html',
   styleUrl: './step-reader.page.scss',
+  providers: [{ provide: MARKDOWN_ISLANDS, useValue: SQL_ISLANDS }],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StepReaderPage {
   private readonly content = inject(ContentService);
   private readonly progress = inject(ProgressService);
+  private readonly sqlEngine = inject(SqlEngineService);
 
   readonly slug = input.required<string>();
   readonly stepId = input.required<string>();
@@ -63,6 +71,12 @@ export class StepReaderPage {
 
   constructor() {
     effect(() => this.navOpen.set(!this.isMobile()));
+
+    effect(() => {
+      const dataset = this.tutorial()?.dataset;
+      // Failures are shown by the SQL blocks through the engine status.
+      if (dataset) untracked(() => this.sqlEngine.open(dataset).catch(() => undefined));
+    });
 
     effect(() => {
       const step = this.step();

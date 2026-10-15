@@ -22,6 +22,8 @@ export interface TutorialManifest {
   readonly topics: readonly string[];
   readonly status: TutorialStatus;
   readonly whatYouWillBuild?: string;
+  /** Seed in `public/datasets/<dataset>.sql`, loaded into the SQL playground of every step. */
+  readonly dataset?: string;
   readonly steps: readonly TutorialStep[];
 }
 

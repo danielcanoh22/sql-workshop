@@ -1,0 +1,112 @@
+:host {
+  display: block;
+}
+
+.result + .result,
+.result__command + .result,
+.result + .result__command {
+  margin-top: 0.75rem;
+}
+
+.result__scroll {
+  width: fit-content;
+  max-width: 100%;
+  max-height: 22rem;
+  overflow: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--ws-radius-sm);
+}
+
+.result__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--ws-font-mono);
+  font-size: 0.82rem;
+
+  th,
+  td {
+    padding: 0.4rem 0.75rem;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    background: var(--mat-sys-surface-container-high);
+    font-weight: 600;
+  }
+
+  tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--mat-sys-surface-container) 55%, transparent);
+  }
+}
+
+.cell--null {
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
+}
+
+.result__summary,
+.result__truncated,
+.result__empty {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.result__command {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.25rem 0;
+  font-family: var(--ws-font-mono);
+  font-size: 0.82rem;
+
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+    color: light-dark(#0b6b3a, #8fe0a8);
+  }
+}
+
+.result--error {
+  padding: 0.75rem 1rem;
+  border-radius: var(--ws-radius-sm);
+  border-left: 4px solid var(--mat-sys-error);
+  background: color-mix(in srgb, var(--mat-sys-error-container) 55%, transparent);
+  color: var(--mat-sys-on-surface);
+
+  p {
+    margin: 0.25rem 0;
+  }
+}
+
+.result__error-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  color: var(--mat-sys-error);
+
+  .material-symbols-outlined {
+    font-size: 1.15rem;
+  }
+}
+
+.result__location {
+  margin-left: auto;
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.result__message {
+  font-family: var(--ws-font-mono);
+  font-size: 0.85rem;
+}
+
+.result__detail,
+.result__hint {
+  font-size: 0.85rem;
+}

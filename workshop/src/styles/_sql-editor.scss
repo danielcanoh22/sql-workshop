@@ -1,0 +1,99 @@
+// CodeMirror (see SqlEditor). Token classes come from `classHighlighter`; colors match the Prism theme.
+.sql-editor {
+  display: block;
+
+  .cm-editor {
+    font-size: 0.875rem;
+    background: transparent;
+    color: light-dark(#24292f, #e6e1f5);
+
+    &.cm-focused {
+      outline: 2px solid color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+      outline-offset: -2px;
+    }
+  }
+
+  .cm-scroller {
+    font-family: var(--ws-font-mono);
+    line-height: 1.65;
+    max-height: 24rem;
+  }
+
+  .cm-content {
+    padding: 0.6rem 0;
+    caret-color: var(--mat-sys-primary);
+  }
+
+  .cm-cursor {
+    border-left-color: var(--mat-sys-primary);
+  }
+
+  .cm-gutters {
+    background: transparent;
+    border-right: 1px solid var(--mat-sys-outline-variant);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .cm-activeLine,
+  .cm-activeLineGutter {
+    background: color-mix(in srgb, var(--mat-sys-primary) 7%, transparent);
+  }
+
+  .cm-selectionBackground,
+  &.cm-focused .cm-selectionBackground,
+  .cm-content ::selection {
+    background: color-mix(in srgb, var(--mat-sys-primary) 25%, transparent) !important;
+  }
+
+  .cm-matchingBracket {
+    background: color-mix(in srgb, var(--mat-sys-tertiary) 25%, transparent);
+    outline: none;
+  }
+
+  .cm-tooltip {
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 8px;
+    background: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface);
+    overflow: hidden;
+  }
+
+  .cm-tooltip-autocomplete > ul > li[aria-selected] {
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+  }
+
+  .tok-keyword {
+    color: light-dark(#5a2fd1, #b9a6ff);
+    font-weight: 600;
+  }
+
+  .tok-string,
+  .tok-string2 {
+    color: light-dark(#0b6b3a, #8fe0a8);
+  }
+
+  .tok-number,
+  .tok-bool,
+  .tok-atom,
+  .tok-literal {
+    color: light-dark(#0a6c74, #5fd8d0);
+  }
+
+  .tok-comment {
+    color: light-dark(#6a737d, #8b87a3);
+    font-style: italic;
+  }
+
+  .tok-operator {
+    color: light-dark(#8a4b00, #ffc27a);
+  }
+
+  .tok-typeName {
+    color: light-dark(#b3261e, #ff8f85);
+  }
+
+  .tok-punctuation {
+    color: light-dark(#57606a, #a9a5c4);
+  }
+}

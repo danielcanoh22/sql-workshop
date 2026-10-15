@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -6,6 +7,7 @@ import { TUTORIAL_MANIFESTS } from '../../core/content/content.service';
 import { provideWorkshopMarkdown } from '../../core/content/markdown.providers';
 import { TutorialManifest } from '../../core/content/tutorial.model';
 import { PROGRESS_STORAGE, ProgressService } from '../../core/progress/progress.service';
+import { SqlEngineService } from '../../core/sql/sql-engine.service';
 import { StepReaderPage } from './step-reader.page';
 
 const TUTORIAL: TutorialManifest = {
@@ -18,6 +20,7 @@ const TUTORIAL: TutorialManifest = {
   estimatedMinutes: 0,
   topics: [],
   status: 'available',
+  dataset: 'shop',
   steps: [
     { id: 'a', title: 'Primer paso', file: '01-a.md', estimatedMinutes: 10 },
     { id: 'b', title: 'Segundo paso', file: '02-b.md', estimatedMinutes: 20 },
@@ -26,6 +29,7 @@ const TUTORIAL: TutorialManifest = {
 };
 
 function setup() {
+  const engine = { status: signal('ready'), open: vi.fn().mockResolvedValue(undefined), run: vi.fn() };
   TestBed.configureTestingModule({
     imports: [StepReaderPage],
     providers: [
@@ -35,6 +39,7 @@ function setup() {
       provideWorkshopMarkdown(),
       { provide: TUTORIAL_MANIFESTS, useValue: [TUTORIAL] },
       { provide: PROGRESS_STORAGE, useValue: null },
+      { provide: SqlEngineService, useValue: engine },
     ],
   });
   const http = TestBed.inject(HttpTestingController);
@@ -56,10 +61,26 @@ function setup() {
     return { fixture, root: fixture.nativeElement as HTMLElement };
   }
 
-  return { open, http, progress };
+  return { open, http, progress, engine };
 }
 
 describe('StepReaderPage', () => {
+  it('opens the tutorial dataset in the SQL engine', async () => {
+    const { open, engine } = setup();
+
+    await open('bookshelf', 'a', 'Texto');
+
+    expect(engine.open).toHaveBeenCalledWith('shop');
+  });
+
+  it('mounts a SQL runner for each runnable fence', async () => {
+    const { open } = setup();
+
+    const { root } = await open('bookshelf', 'a', '```sql run\nSELECT 1;\n```');
+
+    expect(root.querySelector('.runner .runner__run')).not.toBeNull();
+  });
+
   it('shows the step position, duration and the rendered markdown', async () => {
     const { open } = setup();
 
