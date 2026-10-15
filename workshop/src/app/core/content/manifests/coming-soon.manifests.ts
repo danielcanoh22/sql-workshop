@@ -25,11 +25,6 @@ function comingSoon(
 /** Planned syllabus. Each entry becomes its own manifest file once its content exists. */
 export const COMING_SOON: readonly TutorialManifest[] = [
   // Part 1: general SQL
-  comingSoon(6, 'subqueries-ctes', 'Subconsultas y CTEs', 'Consultas dentro de consultas, EXISTS y WITH', 'intermediate', [
-    'Subqueries',
-    'EXISTS',
-    'WITH',
-  ]),
   comingSoon(7, 'modifying-data', 'Modificar datos', 'INSERT, UPDATE y DELETE sin romper nada', 'intermediate', [
     'INSERT',
     'UPDATE',

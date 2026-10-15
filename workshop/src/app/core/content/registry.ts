@@ -1,4 +1,5 @@
 import { COMING_SOON } from './manifests/coming-soon.manifests';
+import { SUBQUERIES_CTES } from './manifests/subqueries-ctes.manifest';
 import { JOINS } from './manifests/joins.manifest';
 import { AGGREGATES_GROUP_BY } from './manifests/aggregates-group-by.manifest';
 import { ORDER_LIMIT } from './manifests/order-limit.manifest';
@@ -18,6 +19,7 @@ export const TUTORIAL_REGISTRY: readonly TutorialManifest[] = [
   ORDER_LIMIT,
   AGGREGATES_GROUP_BY,
   JOINS,
+  SUBQUERIES_CTES,
   ...COMING_SOON,
 ];
 
