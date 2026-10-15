@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, signal, viewChild } from '@angular/core';
 import { IslandComponent } from '../../../core/content/islands';
+import { SchemaStore } from '../../../core/sql/schema.store';
 import { SqlEngineService } from '../../../core/sql/sql-engine.service';
 import { SqlRunOutcome } from '../../../core/sql/sql.model';
 import { ResultView } from '../ui/result-view';
@@ -31,6 +32,7 @@ export class SqlRunner implements IslandComponent<SqlRunnerProps> {
 
   protected readonly edited = computed(() => this.code() !== this.props().code);
   protected readonly status = this.engine.status;
+  protected readonly completion = inject(SchemaStore).completion;
   protected readonly canRun = computed(() => this.status() === 'ready' && !this.running());
 
   protected async run(): Promise<void> {

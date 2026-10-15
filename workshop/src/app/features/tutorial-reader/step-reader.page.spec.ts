@@ -29,7 +29,14 @@ const TUTORIAL: TutorialManifest = {
 };
 
 function setup() {
-  const engine = { status: signal('ready'), open: vi.fn().mockResolvedValue(undefined), run: vi.fn() };
+  const engine = {
+    status: signal('ready'),
+    dataset: signal('shop'),
+    revision: signal(0),
+    open: vi.fn().mockResolvedValue(undefined),
+    run: vi.fn(),
+    schema: vi.fn().mockResolvedValue({ tables: [] }),
+  };
   TestBed.configureTestingModule({
     imports: [StepReaderPage],
     providers: [
@@ -71,6 +78,19 @@ describe('StepReaderPage', () => {
     await open('bookshelf', 'a', 'Texto');
 
     expect(engine.open).toHaveBeenCalledWith('shop');
+  });
+
+  it('toggles the data panel from the reader bar', async () => {
+    const { open } = setup();
+    const { fixture, root } = await open('bookshelf', 'a', 'Texto');
+    const toggle = root.querySelector<HTMLButtonElement>('.reader__data-toggle')!;
+    const expanded = toggle.getAttribute('aria-expanded');
+
+    toggle.click();
+    await fixture.whenStable();
+
+    expect(root.querySelector('app-data-panel')).not.toBeNull();
+    expect(toggle.getAttribute('aria-expanded')).toBe(String(expanded !== 'true'));
   });
 
   it('mounts a SQL runner for each runnable fence', async () => {

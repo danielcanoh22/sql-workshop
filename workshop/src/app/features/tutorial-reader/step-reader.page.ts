@@ -9,6 +9,7 @@ import { ContentService } from '../../core/content/content.service';
 import { MARKDOWN_ISLANDS } from '../../core/content/islands';
 import { ProgressService } from '../../core/progress/progress.service';
 import { SqlEngineService } from '../../core/sql/sql-engine.service';
+import { DataPanel } from '../sql/data-panel/data-panel';
 import { SQL_ISLANDS } from '../sql/islands/sql-islands';
 import { formatMinutes } from '../../shared/format/duration';
 import { MarkdownView } from '../../shared/ui/markdown-view/markdown-view';
@@ -21,7 +22,7 @@ import { StepNav } from './ui/step-nav';
  */
 @Component({
   selector: 'app-step-reader-page',
-  imports: [RouterLink, MatButtonModule, MatSidenavModule, MarkdownView, NotFoundMessage, StepNav],
+  imports: [RouterLink, MatButtonModule, MatSidenavModule, MarkdownView, NotFoundMessage, StepNav, DataPanel],
   templateUrl: './step-reader.page.html',
   styleUrl: './step-reader.page.scss',
   providers: [{ provide: MARKDOWN_ISLANDS, useValue: SQL_ISLANDS }],
@@ -66,11 +67,20 @@ export class StepReaderPage {
     { initialValue: false },
   );
   protected readonly navOpen = signal(true);
+  // The data panel sits beside the text only when there is room for both; otherwise it slides over it.
+  protected readonly isWide = toSignal(
+    inject(BreakpointObserver)
+      .observe('(min-width: 1400px)')
+      .pipe(map((state) => state.matches)),
+    { initialValue: false },
+  );
+  protected readonly dataOpen = signal(false);
 
   private readonly scroller = viewChild(MatSidenavContent);
 
   constructor() {
     effect(() => this.navOpen.set(!this.isMobile()));
+    effect(() => this.dataOpen.set(this.isWide()));
 
     effect(() => {
       const dataset = this.tutorial()?.dataset;

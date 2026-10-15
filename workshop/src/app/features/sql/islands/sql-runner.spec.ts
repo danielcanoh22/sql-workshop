@@ -25,6 +25,8 @@ const ROWS: SqlRunOutcome = {
 function setup(status: EngineStatus = 'ready', props: object = { code: 'SELECT 1;', title: 'Prueba esto' }) {
   const engine = {
     status: signal<EngineStatus>(status),
+    revision: signal(0),
+    schema: vi.fn().mockResolvedValue({ tables: [{ name: 'customers', rowCount: 0, columns: [{ name: 'city' }] }] }),
     run: vi.fn<(sql: string) => Promise<SqlRunOutcome>>().mockResolvedValue(ROWS),
   };
   TestBed.configureTestingModule({ providers: [{ provide: SqlEngineService, useValue: engine }] });
@@ -44,6 +46,14 @@ describe('SqlRunner', () => {
 
     expect(root.querySelector('.runner__title')?.textContent).toContain('Prueba esto');
     expect(root.querySelector('textarea')?.value).toBe('SELECT 1;');
+  });
+
+  it('offers the playground tables and columns to autocompletion', async () => {
+    const { fixture, editor } = setup();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(editor().schema()).toEqual({ customers: ['city'] });
   });
 
   it('runs the current code and shows the result', async () => {

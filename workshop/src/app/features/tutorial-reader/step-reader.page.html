@@ -35,6 +35,18 @@
               <span class="material-symbols-outlined" aria-hidden="true">schedule</span>{{ minutes() }}
             </p>
           }
+          @if (tutorial.dataset) {
+            <button
+              type="button"
+              class="reader__data-toggle"
+              [class.reader__data-toggle--active]="dataOpen()"
+              (click)="dataOpen.set(!dataOpen())"
+              [attr.aria-expanded]="dataOpen()"
+              aria-controls="data-drawer"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">database</span>Datos
+            </button>
+          }
         </div>
 
         <article class="reader__article">
@@ -87,6 +99,20 @@
           </footer>
         </article>
       </mat-sidenav-content>
+
+      @if (tutorial.dataset) {
+        <mat-sidenav
+          id="data-drawer"
+          class="reader__data"
+          position="end"
+          [mode]="isWide() ? 'side' : 'over'"
+          [opened]="dataOpen()"
+          (openedChange)="dataOpen.set($event)"
+          [fixedInViewport]="false"
+        >
+          <app-data-panel (closed)="dataOpen.set(false)" />
+        </mat-sidenav>
+      }
     </mat-sidenav-container>
   } @else {
     <app-not-found-message

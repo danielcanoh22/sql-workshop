@@ -12,7 +12,7 @@
     </button>
   </header>
 
-  <app-sql-editor #editor [code]="props().code" label="Editor SQL" (codeChange)="code.set($event)" (runRequested)="run()" />
+  <app-sql-editor #editor [code]="props().code" [schema]="completion()" label="Editor SQL" (codeChange)="code.set($event)" (runRequested)="run()" />
 
   @switch (status()) {
     @case ('loading') {

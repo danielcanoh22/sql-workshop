@@ -165,3 +165,34 @@
     grid-column: auto;
   }
 }
+
+.reader__data {
+  width: min(26rem, 92vw);
+  background: var(--mat-sys-surface-container-low);
+  border-left: 1px solid var(--mat-sys-outline-variant);
+}
+
+.reader__data-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.8rem 0.3rem 0.6rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+    color: var(--mat-sys-primary);
+  }
+
+  &--active {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+}
