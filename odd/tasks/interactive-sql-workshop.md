@@ -36,7 +36,9 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 | T8b Save challenge progress (solved + last answer) | S5 | inline | done | `62e14f8`; RED→GREEN service, island, reader/nav, content spec; e2e: answer and badge survive reload, nav 1/4, restart keeps solved; 289 tests, build OK |
 | T9 Tutorial 1 El modelo relacional (+ `sql run error` runners) | S2, S5, S7 | inline | done | `5fa8314` (error runners, RED→GREEN) + `31b6e83`; 5 steps, 13 expected-error demos verified to fail |
 | T10 Tutorial 3 Ordenar y paginar | S2, S5, S7, S8 | inline | done | `bfa9469`; 4 steps, 13 ordered challenges; keyset compare: OFFSET 80020 rows/1259 pages vs keyset 20 rows/4 pages; 367 tests, build OK |
-| T11+ Remaining Part 1 (4-12), Part 2, optional block, capstones | S2, S6 | — | pending | |
+| T11 Tutorial 4 Agregaciones y GROUP BY | S2, S5, S7 | inline | done | `3699af3`; 4 steps, 13 challenges, error demos for GROUP BY rule and aggregates in WHERE |
+| T12 Tutorial 5 JOINs | S2, S5, S7, S8 | inline | done | `c4d4876`; 4 steps, 13 challenges; FK index compare: Seq Scan 200091 rows/1278 pages vs 15 pages (~3.4 s in browser); 457 tests, build OK |
+| T13+ Remaining Part 1 (6-12), Part 2, optional block, capstones | S2, S6 | — | pending | |
 
 ## Log
 
@@ -49,3 +51,4 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 - **L7 (2026-10-15):** Vertical slice complete. Store dataset: 30 customers (3 without city, 3 inactive), 6 categories, 30 products, 90 orders, 180 order lines; customers 29-30 have no orders and products 29-30 were never sold (for LEFT JOIN lessons). Challenges in SELECT/WHERE are unordered because ORDER BY comes in tutorial 3. Verified comparisons: EXTRACT on signup_date = Seq Scan 100030 rows/1226 pages vs range or BETWEEN = Index Scan 49 pages; lower(email) = Seq Scan vs email = Index Scan 4 pages.
 - **L8 (2026-10-15, user):** "Lo probé y parece que está super bien. ¿Estaría bien guardar el progreso de los retos o qué?" → proposed saving solved state and last answer; user: "Dale, implementalo así". Keys are `<tutorial>/<step>/<title>` in `sql-workshop.challenges.v1`; steps declare `challenges` in the manifest, validated by the content spec.
 - **L9 (2026-10-15, user):** "Dale sigue con esos 2 tutoriales" (El modelo relacional, Ordenar y paginar). Findings: PGlite databases use collation `C` (byte order; ICU `unicode` collation available and taught in ORDER BY); sequences jump ahead after snapshot restore (logged 32 at a time), so setup rows referenced by id use explicit ids.
+- **L10 (2026-10-15, user):** "Dale, seguí con esos dos tutoriales" (Agregaciones y GROUP BY, JOINs). Beginner level complete (tutorials 1-5). PostgreSQL moves non-aggregate HAVING conditions to WHERE (identical plans), so it is taught as a readability rule, not a performance one.
