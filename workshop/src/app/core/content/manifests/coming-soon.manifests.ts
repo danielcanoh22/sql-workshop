@@ -25,10 +25,6 @@ function comingSoon(
 /** Planned syllabus. Each entry becomes its own manifest file once its content exists. */
 export const COMING_SOON: readonly TutorialManifest[] = [
   // Part 1: general SQL
-  comingSoon(12, 'indexes-explain', 'Índices y EXPLAIN', 'Por qué una consulta es lenta y cómo arreglarla', 'intermediate', [
-    'Índices',
-    'EXPLAIN',
-  ]),
   // Part 2: PostgreSQL
   comingSoon(13, 'postgres-types', 'Tipos de PostgreSQL', 'IDENTITY, UUID y timestamptz', 'advanced', [
     'PostgreSQL',

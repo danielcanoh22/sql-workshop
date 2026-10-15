@@ -1,4 +1,5 @@
 import { COMING_SOON } from './manifests/coming-soon.manifests';
+import { INDEXES_EXPLAIN } from './manifests/indexes-explain.manifest';
 import { EXPRESSIONS_FUNCTIONS } from './manifests/expressions-functions.manifest';
 import { TRANSACTIONS } from './manifests/transactions.manifest';
 import { DATA_MODELING } from './manifests/data-modeling.manifest';
@@ -30,6 +31,7 @@ export const TUTORIAL_REGISTRY: readonly TutorialManifest[] = [
   DATA_MODELING,
   TRANSACTIONS,
   EXPRESSIONS_FUNCTIONS,
+  INDEXES_EXPLAIN,
   ...COMING_SOON,
 ];
 
