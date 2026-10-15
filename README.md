@@ -79,6 +79,8 @@ SELECT name FROM customers;
   with ```` ```sql ordered ````, row order are not), so any correct query passes. Optional hidden fences inside
   the challenge: ```` ```sql starter ```` (initial editor content), ```` ```sql verify ```` (query compared after
   data-changing answers, e.g. `UPDATE`) and ```` ```sql setup ```` (runs before answer and solution).
+  A conceptual challenge can still show SQL in its solution with ```` ```sql example ````, which does not make it
+  auto-checked.
 - For schema challenges (`CREATE TABLE`, `ALTER TABLE`), check **behavior** in the verify query with the dataset helper
   `workshop.try(statement, result_query DEFAULT NULL)` (schema `workshop`, invisible in the data panel). It runs the
   statement(s), undoes them, and returns `'ok'`, `'not null'`, `'unique'`, `'check'`, `'foreign key'`, `'no table'`,

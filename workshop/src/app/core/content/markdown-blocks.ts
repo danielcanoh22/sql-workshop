@@ -20,6 +20,7 @@ import type { MarkedExtension, RendererThis, Token, TokenizerThis, Tokens } from
  *   ```sql title="queries/top-customers.sql"   -> filename header above the block
  *   ```sql run title="Optional caption"         -> editable SQL block with a Run button (an interactive island)
  *   ```sql run error                             -> same, for an example that fails on purpose
+ *   ```sql example (inside :::solution)          -> code in the answer of a conceptual (not auto-checked) challenge
  *
  * A container closes on the first line made of exactly the same number of colons that opened it.
  */
@@ -163,7 +164,12 @@ function extractChallengeCheck(token: ContainerToken): ChallengeIslandProps | un
 
   const solution = token.tokens.find((child): child is ContainerToken => isContainer(child) && child.kind === 'solution');
   const fence = solution?.tokens.find(
-    (child): child is Tokens.Code => child.type === 'code' && parseInfoString((child as Tokens.Code).lang).language === 'sql',
+    (child): child is Tokens.Code => {
+      if (child.type !== 'code') return false;
+      const info = parseInfoString((child as Tokens.Code).lang);
+      // ```sql example shows code in the explanation of a conceptual challenge without making it auto-checked.
+      return info.language === 'sql' && !info.flags.has('example');
+    },
   );
   if (!fence) return undefined;
 

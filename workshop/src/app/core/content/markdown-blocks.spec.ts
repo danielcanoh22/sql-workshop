@@ -157,6 +157,13 @@ describe('workshop markdown blocks', () => {
       expect(shownCode).not.toContain('is_active FROM');
     });
 
+    it('keeps challenges whose solution only shows ```sql example code as plain text challenges', () => {
+      const html = render('::::challenge Piensa\nTexto\n:::solution\n```sql example\nUPDATE t SET x = 1;\n```\n:::\n::::');
+
+      expect(islandsOf(html)).toHaveLength(0);
+      expect(html).toContain('<code class="language-sql">UPDATE t SET x = 1;');
+    });
+
     it('keeps challenges without a SQL solution as plain text challenges', () => {
       const html = render('::::challenge Piensa\nTexto\n:::solution\nUna respuesta en palabras.\n:::\n::::');
 
