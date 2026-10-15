@@ -66,7 +66,20 @@ interface ContainerToken extends Tokens.Generic {
   tokens: Token[];
   /** 1-based position among the hints of the parent challenge. */
   hintNumber?: number;
+  /** Props of the auto-check island of a challenge that has a SQL solution. */
+  checkIsland?: ChallengeIslandProps;
 }
+
+export interface ChallengeIslandProps {
+  readonly solutionSql: string;
+  readonly ordered?: boolean;
+  readonly verifySql?: string;
+  readonly setupSql?: string;
+  readonly starter?: string;
+}
+
+/** Fences that configure a challenge instead of being shown: ```sql starter | verify | setup. */
+const HIDDEN_FENCE_ROLES = ['starter', 'verify', 'setup'] as const;
 
 // Opening line: 3+ colons, a lowercase type, optional title.
 const OPENING_LINE = /^(:{3,})([a-z]+)[ \t]*([^\n]*)(?:\n|$)/;
@@ -119,27 +132,68 @@ function tokenizeContainer(this: TokenizerThis, src: string): ContainerToken | u
     for (const child of token.tokens) {
       if (isContainer(child) && child.kind === 'hint') child.hintNumber = ++hintCount;
     }
+    token.checkIsland = extractChallengeCheck(token);
   }
 
   return token;
 }
 
+/**
+ * A challenge becomes auto-checked when its `:::solution` holds a ```sql fence (the reference solution; the
+ * `ordered` flag makes row order count). Hidden ```sql starter / verify / setup fences are removed from the body
+ * and travel to the island instead.
+ */
+function extractChallengeCheck(token: ContainerToken): ChallengeIslandProps | undefined {
+  const hidden: Partial<Record<(typeof HIDDEN_FENCE_ROLES)[number], string>> = {};
+  token.tokens = token.tokens.filter((child) => {
+    if (child.type !== 'code') return true;
+    const { language, flags } = parseInfoString((child as Tokens.Code).lang);
+    const role = HIDDEN_FENCE_ROLES.find((r) => flags.has(r));
+    if (language !== 'sql' || !role) return true;
+    hidden[role] = (child as Tokens.Code).text;
+    return false;
+  });
+
+  const solution = token.tokens.find((child): child is ContainerToken => isContainer(child) && child.kind === 'solution');
+  const fence = solution?.tokens.find(
+    (child): child is Tokens.Code => child.type === 'code' && parseInfoString((child as Tokens.Code).lang).language === 'sql',
+  );
+  if (!fence) return undefined;
+
+  return {
+    solutionSql: fence.text,
+    ...(parseInfoString(fence.lang).flags.has('ordered') ? { ordered: true } : {}),
+    ...(hidden.verify !== undefined ? { verifySql: hidden.verify } : {}),
+    ...(hidden.setup !== undefined ? { setupSql: hidden.setup } : {}),
+    ...(hidden.starter !== undefined ? { starter: hidden.starter } : {}),
+  };
+}
+
 function renderContainer(this: RendererThis, token: Tokens.Generic): string {
   const container = token as ContainerToken;
-  const body = this.parser.parse(container.tokens);
   const title = container.titleTokens.length
     ? this.parser.parseInline(container.titleTokens)
     : '';
 
+  if (container.kind === 'challenge') {
+    // The auto-check island goes right after the statement, before the first hint or the solution.
+    const split = container.tokens.findIndex((t) => isContainer(t) && (t.kind === 'hint' || t.kind === 'solution'));
+    const at = container.checkIsland && split !== -1 ? split : container.tokens.length;
+    const body =
+      this.parser.parse(container.tokens.slice(0, at)) +
+      (container.checkIsland ? islandHtml('challenge', container.checkIsland) : '') +
+      this.parser.parse(container.tokens.slice(at));
+    return (
+      `<section class="challenge">` +
+      `<header class="challenge__header">${icon('ads_click', 'challenge__icon')}` +
+      `<span class="challenge__label">Reto</span>` +
+      (title ? `<span class="challenge__title">${title}</span>` : '') +
+      `</header><div class="challenge__body">${body}</div></section>\n`
+    );
+  }
+
+  const body = this.parser.parse(container.tokens);
   switch (container.kind) {
-    case 'challenge':
-      return (
-        `<section class="challenge">` +
-        `<header class="challenge__header">${icon('ads_click', 'challenge__icon')}` +
-        `<span class="challenge__label">Reto</span>` +
-        (title ? `<span class="challenge__title">${title}</span>` : '') +
-        `</header><div class="challenge__body">${body}</div></section>\n`
-      );
     case 'hint':
       return (
         `<details class="challenge-hint"><summary>Pista ${container.hintNumber ?? 1}</summary>` +

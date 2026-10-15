@@ -65,6 +65,12 @@ SELECT name FROM customers;
 - ```` ```sql run ```` (optionally `title="Caption"`) renders an editable SQL block with a **Ejecutar** button
   (Ctrl/Cmd + Enter) that runs against the tutorial playground. Set `dataset` in the manifest to load
   `workshop/public/datasets/<dataset>.sql`; the playground keeps the learner's changes while they stay in the tutorial.
+- A `::::challenge` whose `:::solution` contains a ```` ```sql ```` fence becomes **auto-checked**: an answer
+  editor with **Ejecutar** and **Comprobar** appears after the statement. Checking runs the answer and the solution
+  on fresh copies of the dataset and compares their results (column names are ignored; values, row counts and,
+  with ```` ```sql ordered ````, row order are not), so any correct query passes. Optional hidden fences inside
+  the challenge: ```` ```sql starter ```` (initial editor content), ```` ```sql verify ```` (query compared after
+  data-changing answers, e.g. `UPDATE`) and ```` ```sql setup ```` (runs before answer and solution).
 - Interactive blocks are "islands": the renderer emits a `data-island` placeholder and `MarkdownView` mounts the
   component registered in `features/sql/islands/sql-islands.ts`.
 - Highlighted languages: `sql`, `json`, `bash`.

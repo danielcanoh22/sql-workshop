@@ -1,0 +1,112 @@
+:host {
+  display: block;
+  margin: 1rem 0;
+}
+
+.workbench {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--ws-radius-sm);
+  background: var(--mat-sys-surface);
+  overflow: hidden;
+}
+
+.workbench__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem 0.45rem 0.85rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container);
+}
+
+.workbench__icon {
+  font-size: 1.1rem;
+  color: var(--mat-sys-tertiary);
+}
+
+.workbench__title {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.8rem 0.3rem 0.55rem;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.challenge__run {
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface);
+}
+
+.challenge__check {
+  background: var(--mat-sys-tertiary);
+  color: var(--mat-sys-on-tertiary);
+}
+
+.challenge__output {
+  padding: 0.75rem 0.85rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.verdict {
+  padding: 0.75rem 0.85rem 0.85rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  &--correct {
+    background: color-mix(in srgb, light-dark(#0b6b3a, #8fe0a8) 12%, transparent);
+  }
+
+  &--wrong {
+    background: color-mix(in srgb, var(--mat-sys-error) 8%, transparent);
+  }
+}
+
+.verdict__message {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+
+  .verdict--correct & .material-symbols-outlined {
+    color: light-dark(#0b6b3a, #8fe0a8);
+  }
+
+  .verdict--wrong & .material-symbols-outlined {
+    color: var(--mat-sys-error);
+  }
+}
+
+.verdict__compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.75rem;
+}
+
+.verdict__label {
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mat-sys-on-surface-variant);
+}

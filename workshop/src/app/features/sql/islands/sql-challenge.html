@@ -1,0 +1,60 @@
+<div class="workbench">
+  <header class="workbench__header">
+    <span class="material-symbols-outlined workbench__icon" aria-hidden="true">edit_note</span>
+    <span class="workbench__title">Tu respuesta</span>
+    <button type="button" class="challenge__run" [disabled]="!ready() || !hasCode()" (click)="run()" title="Ctrl + Enter">
+      <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>{{ busy() === 'run' ? 'Ejecutando…' : 'Ejecutar' }}
+    </button>
+    <button type="button" class="challenge__check" [disabled]="!ready() || !hasCode()" (click)="verify()">
+      <span class="material-symbols-outlined" aria-hidden="true">task_alt</span>{{ busy() === 'check' ? 'Comprobando…' : 'Comprobar' }}
+    </button>
+  </header>
+
+  <app-sql-editor
+    [code]="starter()"
+    [schema]="completion()"
+    label="Tu respuesta al reto"
+    (codeChange)="code.set($event)"
+    (runRequested)="run()"
+  />
+
+  @if (runOutcome(); as run) {
+    <div class="challenge__output" aria-live="polite">
+      <app-result-view [outcome]="run.result" [sql]="run.sql" />
+    </div>
+  }
+
+  @if (check(); as check) {
+    @let outcome = check.outcome;
+    <div
+      class="verdict"
+      [class.verdict--correct]="outcome.verdict === 'correct'"
+      [class.verdict--wrong]="outcome.verdict !== 'correct'"
+      aria-live="polite"
+    >
+      <p class="verdict__message">
+        <span class="material-symbols-outlined" aria-hidden="true">{{
+          outcome.verdict === 'correct' ? 'check_circle' : 'cancel'
+        }}</span>
+        {{ outcome.message }}
+      </p>
+
+      @if (outcome.verdict === 'user-error') {
+        <app-result-view [outcome]="errorOutcome(outcome)" [sql]="check.sql" />
+      } @else if (outcome.verdict !== 'correct' && outcome.expected) {
+        <div class="verdict__compare">
+          @if (outcome.actual; as actual) {
+            <div class="verdict__side">
+              <p class="verdict__label">Tu resultado</p>
+              <app-result-view [outcome]="asOutcome(actual)" [showTiming]="false" />
+            </div>
+          }
+          <div class="verdict__side">
+            <p class="verdict__label">Resultado esperado</p>
+            <app-result-view [outcome]="asOutcome(outcome.expected)" [showTiming]="false" />
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

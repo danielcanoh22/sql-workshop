@@ -51,6 +51,8 @@ export class SqlEditor {
             basicSetup,
             this.language.of(this.sqlLanguage(this.schema())),
             syntaxHighlighting(classHighlighter),
+            // Wrap long queries instead of scrolling sideways under the line-number gutter.
+            EditorView.lineWrapping,
             EditorView.contentAttributes.of({ 'aria-label': this.label() }),
             EditorView.updateListener.of((update) => {
               if (update.docChanged) {

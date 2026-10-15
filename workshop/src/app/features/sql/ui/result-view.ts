@@ -20,6 +20,7 @@ export class ResultView {
   readonly outcome = input.required<SqlRunOutcome>();
   /** The SQL that produced the outcome; used to turn an error position into line and column. */
   readonly sql = input('');
+  readonly showTiming = input(true);
 
   protected readonly format = formatValue;
   protected readonly maxRows = MAX_VISIBLE_ROWS;

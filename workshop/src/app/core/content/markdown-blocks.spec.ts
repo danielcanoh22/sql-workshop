@@ -5,7 +5,101 @@ function render(markdown: string): string {
   return new Marked(workshopMarkdownExtension).parse(markdown, { async: false }) as string;
 }
 
+function islandsOf(html: string): { name: string; props: Record<string, unknown>; element: HTMLElement }[] {
+  const host = document.createElement('div');
+  host.innerHTML = html;
+  return [...host.querySelectorAll<HTMLElement>('[data-island]')].map((element) => ({
+    name: element.dataset['island']!,
+    props: JSON.parse(element.dataset['props']!),
+    element,
+  }));
+}
+
+const CHALLENGE = [
+  '::::challenge Clientes de Madrid',
+  'Lista el nombre de los clientes de Madrid.',
+  '',
+  '```sql starter',
+  'SELECT',
+  '```',
+  '',
+  ':::hint',
+  'Filtra con WHERE.',
+  ':::',
+  '',
+  ':::solution',
+  '```sql ordered',
+  "SELECT first_name FROM customers WHERE city = 'Madrid' ORDER BY first_name;",
+  '```',
+  'Explicación de la solución.',
+  ':::',
+  '::::',
+].join('\n');
+
 describe('workshop markdown blocks', () => {
+  describe('auto-checked challenges', () => {
+    it('adds a challenge island with the reference solution, its flags and the starter code', () => {
+      const [island] = islandsOf(render(CHALLENGE));
+
+      expect(island.name).toBe('challenge');
+      expect(island.props).toEqual({
+        solutionSql: "SELECT first_name FROM customers WHERE city = 'Madrid' ORDER BY first_name;",
+        ordered: true,
+        starter: 'SELECT',
+      });
+    });
+
+    it('places the island after the statement and before the hints, and hides the starter fence', () => {
+      const html = render(CHALLENGE);
+      const host = document.createElement('div');
+      host.innerHTML = html;
+      const body = host.querySelector('.challenge__body')!;
+      const order = [...body.children].map((child) => child.getAttribute('data-island') ?? child.className ?? child.tagName);
+
+      expect(order).toEqual(['', 'challenge', 'challenge-hint', 'challenge-solution']);
+      expect(body.firstElementChild?.textContent).toContain('Lista el nombre');
+      expect(body.querySelectorAll('pre')).toHaveLength(1); // only the solution is shown, inside its <details>
+    });
+
+    it('passes hidden verify and setup queries for data-changing challenges', () => {
+      const markdown = [
+        '::::challenge Desactivar clientes',
+        'Desactiva a los clientes sin ciudad.',
+        '```sql verify',
+        'SELECT id, is_active FROM customers ORDER BY id;',
+        '```',
+        '```sql setup',
+        "INSERT INTO customers (first_name, last_name, email, country, signup_date) VALUES ('X', 'Y', 'x@y.z', 'Chile', '2025-01-01');",
+        '```',
+        ':::solution',
+        '```sql',
+        'UPDATE customers SET is_active = false WHERE city IS NULL;',
+        '```',
+        ':::',
+        '::::',
+      ].join('\n');
+
+      const [island] = islandsOf(render(markdown));
+
+      expect(island.props).toEqual({
+        solutionSql: 'UPDATE customers SET is_active = false WHERE city IS NULL;',
+        verifySql: 'SELECT id, is_active FROM customers ORDER BY id;',
+        setupSql:
+          "INSERT INTO customers (first_name, last_name, email, country, signup_date) VALUES ('X', 'Y', 'x@y.z', 'Chile', '2025-01-01');",
+      });
+      const challenge = island.element.closest('.challenge')!;
+      const shownCode = [...challenge.querySelectorAll('pre')].map((pre) => pre.textContent).join();
+      expect(shownCode).toContain('UPDATE customers'); // the solution, inside its <details>
+      expect(shownCode).not.toContain('is_active FROM');
+    });
+
+    it('keeps challenges without a SQL solution as plain text challenges', () => {
+      const html = render('::::challenge Piensa\nTexto\n:::solution\nUna respuesta en palabras.\n:::\n::::');
+
+      expect(islandsOf(html)).toHaveLength(0);
+    });
+  });
+
   describe('callouts', () => {
     const cases: [type: string, label: string][] = [
       ['concept', 'Concepto'],

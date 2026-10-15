@@ -45,7 +45,9 @@
             <p class="result__truncated">Mostrando {{ maxRows }} de {{ block.result.rows.length }} filas.</p>
           }
         }
-        <p class="result__summary">{{ rowsText(block.result.rows.length) }} · {{ durationText() }}</p>
+        <p class="result__summary">
+          {{ rowsText(block.result.rows.length) }}@if (showTiming()) { · {{ durationText() }}}
+        </p>
       </div>
     } @else {
       <p class="result__command">

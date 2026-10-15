@@ -42,6 +42,15 @@ describe('ResultView', () => {
     expect(root.querySelector('.result__summary')?.textContent).toContain('2 filas');
   });
 
+  it('can hide the timing, e.g. for results that were not just executed', async () => {
+    const fixture = TestBed.createComponent(ResultView);
+    fixture.componentRef.setInput('outcome', select([['Ana', 'Madrid']]));
+    fixture.componentRef.setInput('showTiming', false);
+    await fixture.whenStable();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.result__summary')?.textContent?.trim()).toBe('1 fila');
+  });
+
   it('says so when a SELECT returns no rows', async () => {
     const root = await render(select([]));
 
