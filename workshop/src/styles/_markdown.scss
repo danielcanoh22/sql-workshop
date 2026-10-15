@@ -85,6 +85,12 @@
     background: var(--mat-sys-surface-container);
   }
 
+  // Table and column names in a table cell must not break mid-word (`categorie|s`).
+  td > code,
+  th > code {
+    white-space: nowrap;
+  }
+
   // Inline code
   :not(pre) > code {
     font-family: var(--ws-font-mono);

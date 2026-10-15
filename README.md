@@ -36,6 +36,11 @@ bun run build        # production build in workshop/dist
 
 Levels are `beginner`, `intermediate`, `advanced` and `project`; the catalog shows one section per level.
 
+`bun run test` also validates the content of every available tutorial against its dataset
+(`src/app/core/content/tutorial-content.spec.ts`): every runnable block runs, every challenge solution passes its own
+check and lists its columns (no `SELECT *`), and every comparison returns the same rows in all variants with the
+`best` one reading the fewest pages.
+
 ## Markdown syntax for authors
 
 Standard Markdown plus these blocks. A container opens with `:::type Optional title` and closes with a line containing

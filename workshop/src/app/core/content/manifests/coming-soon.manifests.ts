@@ -32,12 +32,6 @@ export const COMING_SOON: readonly TutorialManifest[] = [
     'Tipos de datos',
     'NULL',
   ]),
-  comingSoon(2, 'select-where', 'SELECT y WHERE', 'Pedir exactamente los datos que necesitas', 'beginner', [
-    'SELECT',
-    'WHERE',
-    'IN',
-    'LIKE',
-  ]),
   comingSoon(3, 'order-limit', 'Ordenar y paginar', 'ORDER BY, LIMIT y OFFSET: así pagina una app', 'beginner', [
     'ORDER BY',
     'LIMIT',

@@ -1,4 +1,5 @@
 import { COMING_SOON } from './manifests/coming-soon.manifests';
+import { SELECT_WHERE } from './manifests/select-where.manifest';
 import { TutorialManifest } from './tutorial.model';
 
 /**
@@ -8,6 +9,7 @@ import { TutorialManifest } from './tutorial.model';
  *   3. add ONE line to this array.
  */
 export const TUTORIAL_REGISTRY: readonly TutorialManifest[] = [
+  SELECT_WHERE,
   ...COMING_SOON,
 ];
 
