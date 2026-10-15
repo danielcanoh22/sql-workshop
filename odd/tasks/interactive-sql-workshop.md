@@ -38,7 +38,9 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 | T10 Tutorial 3 Ordenar y paginar | S2, S5, S7, S8 | inline | done | `bfa9469`; 4 steps, 13 ordered challenges; keyset compare: OFFSET 80020 rows/1259 pages vs keyset 20 rows/4 pages; 367 tests, build OK |
 | T11 Tutorial 4 Agregaciones y GROUP BY | S2, S5, S7 | inline | done | `3699af3`; 4 steps, 13 challenges, error demos for GROUP BY rule and aggregates in WHERE |
 | T12 Tutorial 5 JOINs | S2, S5, S7, S8 | inline | done | `c4d4876`; 4 steps, 13 challenges; FK index compare: Seq Scan 200091 rows/1278 pages vs 15 pages (~3.4 s in browser); 457 tests, build OK |
-| T13+ Remaining Part 1 (6-12), Part 2, optional block, capstones | S2, S6 | — | pending | |
+| T13 Tutorial 6 Subconsultas y CTEs | S2, S5, S7, S8 | inline | done | `fe04716`; 4 steps, 12 challenges; correlated vs JOIN compare: 240264 vs 1513 pages (similar time in memory, explained) |
+| T14 Tutorial 7 Modificar datos | S2, S5, S7, S8 | inline | done | `3278263`; 4 steps, 13 DML challenges with verify queries; sargable UPDATE compare 611 vs 8 pages; 545 tests, build OK |
+| T15+ Remaining Part 1 (8-12), Part 2, optional block, capstones | S2, S6 | — | pending | |
 
 ## Log
 
@@ -52,3 +54,4 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 - **L8 (2026-10-15, user):** "Lo probé y parece que está super bien. ¿Estaría bien guardar el progreso de los retos o qué?" → proposed saving solved state and last answer; user: "Dale, implementalo así". Keys are `<tutorial>/<step>/<title>` in `sql-workshop.challenges.v1`; steps declare `challenges` in the manifest, validated by the content spec.
 - **L9 (2026-10-15, user):** "Dale sigue con esos 2 tutoriales" (El modelo relacional, Ordenar y paginar). Findings: PGlite databases use collation `C` (byte order; ICU `unicode` collation available and taught in ORDER BY); sequences jump ahead after snapshot restore (logged 32 at a time), so setup rows referenced by id use explicit ids.
 - **L10 (2026-10-15, user):** "Dale, seguí con esos dos tutoriales" (Agregaciones y GROUP BY, JOINs). Beginner level complete (tutorials 1-5). PostgreSQL moves non-aggregate HAVING conditions to WHERE (identical plans), so it is taught as a readability rule, not a performance one.
+- **L11 (2026-10-15, user):** "Dale, seguí con esos dos tutoriales" (Subconsultas y CTEs, Modificar datos). In-browser timings can be similar even when pages differ 150x (everything is in memory); content explains it and keeps pages as the headline metric.
