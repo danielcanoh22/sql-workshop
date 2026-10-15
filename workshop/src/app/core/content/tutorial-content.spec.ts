@@ -74,16 +74,21 @@ describe.each(available.map((t) => [t.slug, t] as const))('tutorial %s', (slug, 
 
   afterAll(() => engine?.dispose());
 
-  it.each(of('runner'))('runnable block in %s behaves as announced: %j', async (_step, props) => {
-    await engine.reset();
-    const outcome = await engine.run(String(props['code']));
+  // Runnable blocks build on each other (create a table, then insert into it), as when the learner runs them
+  // top to bottom: each step starts from a fresh dataset and runs its blocks in order.
+  it.each(steps.map((step) => [step.id, step.islands.filter((island) => island.name === 'runner')] as const))(
+    'runnable blocks in %s behave as announced when run in order',
+    async (_step, runners) => {
+      await engine.reset();
+      for (const { props } of runners) {
+        const outcome = await engine.run(String(props['code']));
+        const expected = props['expectError'] ? 'error' : 'ok';
+        const actual = outcome.ok ? 'ok' : props['expectError'] ? 'error' : outcome.error.message;
 
-    if (props['expectError']) {
-      expect(outcome.ok, 'a block marked `error` must fail').toBe(false);
-    } else {
-      expect(outcome.ok ? 'ok' : outcome.error.message).toBe('ok');
-    }
-  });
+        expect(actual, String(props['code'])).toBe(expected);
+      }
+    },
+  );
 
   it.each(of('challenge'))('challenge solution in %s passes its own check: %j', async (_step, raw) => {
     const props = raw as unknown as ChallengeIslandProps;
