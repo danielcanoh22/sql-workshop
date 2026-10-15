@@ -1,0 +1,11 @@
+/* Web workers run without the DOM: they get the `webworker` lib instead. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2022", "webworker"],
+    "types": []
+  },
+  "include": [
+    "src/**/*.worker.ts"
+  ]
+}

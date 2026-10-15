@@ -32,7 +32,7 @@ export const COMING_SOON: readonly TutorialManifest[] = [
     'Tipos de datos',
     'NULL',
   ]),
-  comingSoon(2, 'select-where', 'SELECT y WHERE', 'Pedir exactamente los datos que necesitás', 'beginner', [
+  comingSoon(2, 'select-where', 'SELECT y WHERE', 'Pedir exactamente los datos que necesitas', 'beginner', [
     'SELECT',
     'WHERE',
     'IN',

@@ -3,6 +3,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { TitleStrategy, provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 import { provideWorkshopMarkdown } from './core/content/markdown.providers';
 import { WorkshopTitleStrategy } from './core/content/route-titles';
+import { SQL_WORKER_FACTORY } from './core/sql/sql-engine.service';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -12,5 +13,9 @@ export const appConfig: ApplicationConfig = {
     { provide: TitleStrategy, useExisting: WorkshopTitleStrategy },
     provideHttpClient(withFetch()),
     provideWorkshopMarkdown(),
+    {
+      provide: SQL_WORKER_FACTORY,
+      useValue: () => new Worker(new URL('./core/sql/sql.worker', import.meta.url), { type: 'module' }),
+    },
   ],
 };
