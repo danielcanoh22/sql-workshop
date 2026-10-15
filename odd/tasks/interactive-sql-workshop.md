@@ -40,7 +40,11 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 | T12 Tutorial 5 JOINs | S2, S5, S7, S8 | inline | done | `c4d4876`; 4 steps, 13 challenges; FK index compare: Seq Scan 200091 rows/1278 pages vs 15 pages (~3.4 s in browser); 457 tests, build OK |
 | T13 Tutorial 6 Subconsultas y CTEs | S2, S5, S7, S8 | inline | done | `fe04716`; 4 steps, 12 challenges; correlated vs JOIN compare: 240264 vs 1513 pages (similar time in memory, explained) |
 | T14 Tutorial 7 Modificar datos | S2, S5, S7, S8 | inline | done | `3278263`; 4 steps, 13 DML challenges with verify queries; sargable UPDATE compare 611 vs 8 pages; 545 tests, build OK |
-| T15+ Remaining Part 1 (8-12), Part 2, optional block, capstones | S2, S6 | — | pending | |
+| T15 Behavior probes `workshop.try` + verification-oriented feedback | S5, S6 | inline | done | `f7a5802`; RED→GREEN feedback wording; probes verified in PGlite (check/unique/fk/not null/cascade, always undone) |
+| T16 Tutorial 8 Tablas y restricciones (+ runners run in order per step in content spec) | S2, S5, S7 | inline | done | `7e81357`; 9 schema challenges checked by behavior; 5 typical wrong answers caught |
+| T17 Diff of differing checks in wrong verdicts | S5 | inline | done | `dd5edd0`; RED→GREEN diffByFirstColumn + challenge view |
+| T18 Tutorial 9 Modelado de datos | S2, S5, S7 | inline | done | `43b656d`; 6 challenges incl. data migration and library schema; 4 wrong answers caught; 506 tests, build OK |
+| T19+ Remaining Part 1 (10-12), Part 2, optional block, capstones | S2, S6 | — | pending | |
 
 ## Log
 
@@ -55,3 +59,4 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 - **L9 (2026-10-15, user):** "Dale sigue con esos 2 tutoriales" (El modelo relacional, Ordenar y paginar). Findings: PGlite databases use collation `C` (byte order; ICU `unicode` collation available and taught in ORDER BY); sequences jump ahead after snapshot restore (logged 32 at a time), so setup rows referenced by id use explicit ids.
 - **L10 (2026-10-15, user):** "Dale, seguí con esos dos tutoriales" (Agregaciones y GROUP BY, JOINs). Beginner level complete (tutorials 1-5). PostgreSQL moves non-aggregate HAVING conditions to WHERE (identical plans), so it is taught as a readability rule, not a performance one.
 - **L11 (2026-10-15, user):** "Dale, seguí con esos dos tutoriales" (Subconsultas y CTEs, Modificar datos). In-browser timings can be similar even when pages differ 150x (everything is in memory); content explains it and keeps pages as the headline metric.
+- **L12 (2026-10-15, user):** "Dale" (Tablas y restricciones, Modelado de datos). Schema challenges are checked by behavior through `workshop.try(statement, result_query)` in the store dataset (schema `workshop`, invisible in the panel). The content spec runs each step's runnable blocks in order (they build on each other). Dev server cold compile makes first page loads take up to ~16 s in e2e after a restart; not an app issue.
