@@ -112,7 +112,12 @@ export class SqlEngine {
       };
     }
 
-    const comparison = compareResultSets(actual, expected, spec.ordered ?? false);
+    const comparison = compareResultSets(
+      actual,
+      expected,
+      spec.ordered ?? false,
+      spec.verifySql ? 'verification' : 'query',
+    );
     return { ...comparison, actual, expected };
   }
 

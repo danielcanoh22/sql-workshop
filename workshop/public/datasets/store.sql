@@ -138,3 +138,33 @@ FROM orders AS o
 CROSS JOIN generate_series(0, 2) AS k
 JOIN products AS p ON p.id = (o.id * 3 + k * 11) % 28 + 1
 WHERE k <= o.id % 3;
+
+-- Workshop helper (not part of the store): checks how a table behaves in auto-checked challenges.
+-- workshop.try runs a statement and reports what happened, then undoes it:
+--   'ok', 'not null', 'unique', 'check', 'foreign key', 'no table', 'no column' or the SQLSTATE of another error.
+-- With result_query, it returns that query's (single) value instead of 'ok', evaluated before undoing.
+CREATE SCHEMA workshop;
+
+CREATE FUNCTION workshop.try(statement text, result_query text DEFAULT NULL) RETURNS text
+LANGUAGE plpgsql AS $fn$
+DECLARE
+  outcome text := 'ok';
+BEGIN
+  BEGIN
+    EXECUTE statement;
+    IF result_query IS NOT NULL THEN
+      EXECUTE result_query INTO outcome;
+    END IF;
+    RAISE EXCEPTION USING ERRCODE = 'P0099'; -- always undo the probe
+  EXCEPTION
+    WHEN SQLSTATE 'P0099' THEN RETURN outcome;
+    WHEN not_null_violation THEN RETURN 'not null';
+    WHEN unique_violation THEN RETURN 'unique';
+    WHEN check_violation THEN RETURN 'check';
+    WHEN foreign_key_violation THEN RETURN 'foreign key';
+    WHEN undefined_table THEN RETURN 'no table';
+    WHEN undefined_column THEN RETURN 'no column';
+    WHEN OTHERS THEN RETURN SQLSTATE;
+  END;
+END;
+$fn$;

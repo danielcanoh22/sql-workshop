@@ -6,23 +6,39 @@ export interface ComparisonResult {
   readonly message: string;
 }
 
+/**
+ * What is being compared: the rows the learner's query returned, or the rows a hidden verification query returned
+ * after the learner's SQL changed the data. Only the wording of the feedback changes.
+ */
+export type ComparedResult = 'query' | 'verification';
+
 const rowKey = (row: readonly unknown[]) => JSON.stringify(row.map(cellKey));
+
+const VERIFICATION_PREFIX = 'Después de ejecutar tu SQL, los datos no quedan como se esperaba: ';
 
 /**
  * Compares two result sets by position: column names are ignored (aliases are a style choice), the number of
  * columns, the rows and their values are not. With `ordered` the row order must match too.
  */
-export function compareResultSets(actual: SqlResultSet, expected: SqlResultSet, ordered: boolean): ComparisonResult {
+export function compareResultSets(
+  actual: SqlResultSet,
+  expected: SqlResultSet,
+  ordered: boolean,
+  compared: ComparedResult = 'query',
+): ComparisonResult {
+  const verification = compared === 'verification';
+  const subject = verification ? `${VERIFICATION_PREFIX}la comprobación` : 'Tu consulta';
+
   if (actual.columns.length !== expected.columns.length) {
     return {
       verdict: 'column-count',
-      message: `Tu consulta devuelve ${plural(actual.columns.length, 'columna')} y se esperaban ${expected.columns.length}.`,
+      message: `${subject} devuelve ${plural(actual.columns.length, 'columna')} y se esperaban ${expected.columns.length}.`,
     };
   }
   if (actual.rows.length !== expected.rows.length) {
     return {
       verdict: 'row-count',
-      message: `Tu consulta devuelve ${plural(actual.rows.length, 'fila')} y se esperaban ${expected.rows.length}.`,
+      message: `${subject} devuelve ${plural(actual.rows.length, 'fila')} y se esperaban ${expected.rows.length}.`,
     };
   }
 
@@ -35,12 +51,16 @@ export function compareResultSets(actual: SqlResultSet, expected: SqlResultSet, 
     }
     return {
       verdict: 'row-order',
-      message: 'Las filas son las correctas, pero el orden no: revisa tu ORDER BY.',
+      message: verification
+        ? `${VERIFICATION_PREFIX}la comprobación devuelve las filas correctas, pero en otro orden.`
+        : 'Las filas son las correctas, pero el orden no: revisa tu ORDER BY.',
     };
   }
   return {
     verdict: 'values',
-    message: 'Tienes la cantidad correcta de filas y columnas, pero algunos valores no coinciden.',
+    message: verification
+      ? `${VERIFICATION_PREFIX}algunos valores no coinciden.`
+      : 'Tienes la cantidad correcta de filas y columnas, pero algunos valores no coinciden.',
   };
 }
 

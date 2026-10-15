@@ -166,6 +166,21 @@ describe('SqlEngine (real PGlite)', { timeout: 120_000 }, () => {
       expect(wrong.verdict).toBe('values');
     });
 
+    it('words the feedback of data-changing answers around the verification, not the answer', async () => {
+      // Customer 1 has orders 10 and 11 in this spec's seed.
+      const dml = {
+        solutionSql: 'DELETE FROM orders WHERE id = 11',
+        verifySql: 'SELECT id FROM orders WHERE customer_id = 1',
+      };
+
+      const wrong = await engine.check('SELECT 1', dml);
+
+      expect(wrong.verdict).toBe('row-count');
+      expect(wrong.message).toBe(
+        'Después de ejecutar tu SQL, los datos no quedan como se esperaba: la comprobación devuelve 2 filas y se esperaban 1.',
+      );
+    });
+
     it('reports answers that return no rows at all', async () => {
       const outcome = await engine.check("UPDATE customers SET city = 'X' WHERE id = 99", spec);
 

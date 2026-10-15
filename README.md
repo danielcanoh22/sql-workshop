@@ -79,6 +79,12 @@ SELECT name FROM customers;
   with ```` ```sql ordered ````, row order are not), so any correct query passes. Optional hidden fences inside
   the challenge: ```` ```sql starter ```` (initial editor content), ```` ```sql verify ```` (query compared after
   data-changing answers, e.g. `UPDATE`) and ```` ```sql setup ```` (runs before answer and solution).
+- For schema challenges (`CREATE TABLE`, `ALTER TABLE`), check **behavior** in the verify query with the dataset helper
+  `workshop.try(statement, result_query DEFAULT NULL)` (schema `workshop`, invisible in the data panel). It runs the
+  statement(s), undoes them, and returns `'ok'`, `'not null'`, `'unique'`, `'check'`, `'foreign key'`, `'no table'`,
+  `'no column'` or the SQLSTATE; with `result_query` it returns that query's value instead of `'ok'` (e.g. to see a
+  cascade). Combine probes and `information_schema.columns` rows with `UNION ALL` so the learner sees, row by row,
+  which rule their table does not enforce.
 - `:::compare Title` shows several ways to get the same data and compares them with `EXPLAIN (ANALYZE, BUFFERS)`
   on the same fresh copy of the dataset: same result?, rows returned, rows read, **pages read** (the headline,
   machine-independent metric), time (indicative), scan types and the plan tree. Inside it, every
