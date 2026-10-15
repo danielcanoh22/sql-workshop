@@ -34,6 +34,7 @@ function setup() {
   const engine = {
     status: signal('ready'),
     dataset: signal('shop'),
+    transaction: signal('idle'),
     revision: signal(0),
     open: vi.fn().mockResolvedValue(undefined),
     run: vi.fn(),
