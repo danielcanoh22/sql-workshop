@@ -25,14 +25,14 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 
 | ID | Specs | Route | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| T1 Scaffold: copy Angular shell, rebrand, remove .NET content | S3 | inline | pending | |
-| T2 SQL engine: PGlite in a Web Worker, run/reset/seed/explain API, datasets | S1, S9 | inline | pending | |
-| T3 Runnable SQL blocks: CodeMirror editor, run button, result grid, errors | S9, S5 | inline | pending | |
-| T4 Data panel: schema, row preview, relationship diagram, auto-refresh | S4 | inline | pending | |
-| T5 Challenges with auto-check, hints, solution, compare-with-recommended | S5, S7, S8 | inline | pending | |
-| T6 `:::compare` block | S8 | inline | pending | |
-| T7 Vertical-slice tutorial SELECT/WHERE + dataset + solutions test | S2, S5, S7, S10 | inline | pending | |
-| T8 Checkpoint with the user on the vertical slice | S10 | — | pending | |
+| T1 Scaffold: copy Angular shell, rebrand, remove .NET content | S3 | inline | done | `0992490`; RED catalog grouping test then GREEN; 114 tests, build OK |
+| T2 SQL engine: PGlite in a Web Worker, run/reset/seed/explain API, datasets | S1, S9 | inline | done | `13f6d7f`; 13 engine tests on real PGlite (mutation-checked), 7 service tests; 134 tests, build OK |
+| T3 Runnable SQL blocks: CodeMirror editor, run button, result grid, errors | S9, S5 | inline | done | `e1d3f17`; RED→GREEN for fences, islands, result view, runner, reader; headless Chrome e2e (engine ready ~1.1 s, run, error line/col, Ctrl+Enter) |
+| T4 Data panel: schema, row preview, relationship diagram, auto-refresh | S4 | inline | done | `cc580b1`; RED→GREEN layout, store, panel, reader toggle; e2e: DELETE refreshes counts/preview, reset restores, diagram 5 boxes/4 edges, autocomplete lists `products`; 174 tests, build OK |
+| T5 Challenges with auto-check, hints, solution, compare-with-recommended | S5, S7, S8 | inline | done | `8092d06` (check) + `6dbdeea` (compare with recommended); RED→GREEN parser + island; e2e: row-count, row-order, SQL error and an equivalent-but-different correct answer |
+| T6 `:::compare` block | S8 | inline | done | `6dbdeea`; RED→GREEN parser, ComparisonView, island; e2e with 50k rows: lower(email) Seq Scan 50030 rows/608 pages vs email Index Scan 1 row/4 pages, ~0.9 s. SQL injection demo deferred to the parameters tutorial (T9+) |
+| T7 Vertical-slice tutorial SELECT/WHERE + dataset + solutions test | S2, S5, S7, S10 | inline | done | `096a556`; 5 steps (28 runnable blocks, 20 challenges, 2 comparisons); content spec 71 checks, mutation-checked (SELECT * and wrong `best` caught); e2e on all steps; 272 tests, build OK |
+| T8 Checkpoint with the user on the vertical slice | S10 | — | waiting for user | Run `cd workshop && bun run start` |
 | T9+ Remaining Part 1, Part 2, optional block, capstones (planned after T8) | S2, S6 | — | pending | |
 
 ## Log
@@ -40,3 +40,7 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 - **L1 (2026-10-15, user):** "Quiero crear aquí un Workshop como el que tenemos en C:\Users\Daniel\Documents\Development\CSharp_NET-Workshop pero para aprender SQL. Primero quiero aprender SQL en general y luego pasar a PostgreSQL. La idea sería que el Workshop fuera interactivo y que pudiera escribir directamente el código SQL en el navegador para estudiar y practicar. ¿Cómo podríamos hacerlo?"
 - **L2 (2026-10-15):** Engine verified via PGlite docs: Postgres 18.3 WASM build, browser + Node, `PGliteWorker` available; single user/connection; `max_parallel_workers=0`. SQLite rejected (dynamic typing teaches habits Postgres rejects).
 - **L3 (2026-10-15, user):** "Arranca" — implementation authorized; start with the vertical slice (S10).
+- **L4 (2026-10-15):** Catalog groups cards by level (`beginner`, `intermediate`, `advanced`, new `project`); Part 2 and the optional block are `advanced`, capstones `project`. The .NET `vs` callout became `postgres` ("En PostgreSQL").
+- **L5 (2026-10-15):** PGlite findings: create ~1.9 s in Node, restore from `dumpDataDir` ~0.3 s; `clone()` drops parsers/wasm options, so the engine restores snapshots through its own factory. `rowMode: 'array'` keeps duplicated column names. Angular build needs `externalDependencies: ["node:module"]` and the wasm/data assets copied to `pglite/`. Checks and comparisons run on fresh copies of the seeded snapshot, never on the learner's playground. Engine tests were written after the engine (exception to test-first), validated by a mutation run. Timeouts restart the worker (PGlite cannot cancel a statement).
+- **L6 (2026-10-15):** Interactive blocks are "islands": the marked renderer emits `data-island` placeholders and `MarkdownView` mounts components with `createComponent({ hostElement })` after ngx-markdown's `(ready)`. CodeMirror stays out of the initial bundle (448 kB initial). Browser checks run with puppeteer-core + local Chrome from the scratchpad because the Chrome extension was not connected. The data panel is a right `mat-sidenav` (side mode ≥1400 px, overlay below) with an enlarged diagram view.
+- **L7 (2026-10-15):** Vertical slice complete. Store dataset: 30 customers (3 without city, 3 inactive), 6 categories, 30 products, 90 orders, 180 order lines; customers 29-30 have no orders and products 29-30 were never sold (for LEFT JOIN lessons). Challenges in SELECT/WHERE are unordered because ORDER BY comes in tutorial 3. Verified comparisons: EXTRACT on signup_date = Seq Scan 100030 rows/1226 pages vs range or BETWEEN = Index Scan 49 pages; lower(email) = Seq Scan vs email = Index Scan 4 pages.
