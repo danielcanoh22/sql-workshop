@@ -15,6 +15,8 @@ import { ChallengeProgressService, challengeKey } from '../../../core/progress/c
 import { SchemaStore } from '../../../core/sql/schema.store';
 import { SqlEngineService } from '../../../core/sql/sql-engine.service';
 import { CheckOutcome, CheckSpec, SqlResultSet, SqlRunOutcome } from '../../../core/sql/sql.model';
+import { NgTemplateOutlet } from '@angular/common';
+import { diffByFirstColumn } from '../../../core/sql/result-diff';
 import { ComparisonItem, ComparisonView } from '../ui/comparison-view';
 import { ResultView } from '../ui/result-view';
 import { SqlEditor } from '../ui/sql-editor';
@@ -26,7 +28,7 @@ import { SqlEditor } from '../ui/sql-editor';
  */
 @Component({
   selector: 'app-sql-challenge',
-  imports: [SqlEditor, ResultView, ComparisonView],
+  imports: [SqlEditor, ResultView, ComparisonView, NgTemplateOutlet],
   templateUrl: './sql-challenge.html',
   styleUrl: './sql-challenge.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,6 +66,13 @@ export class SqlChallenge implements IslandComponent<ChallengeIslandProps> {
   protected readonly runOutcome = signal<{ sql: string; result: SqlRunOutcome } | undefined>(undefined);
   protected readonly check = signal<{ sql: string; outcome: CheckOutcome } | undefined>(undefined);
   protected readonly comparison = signal<ComparisonItem[] | undefined>(undefined);
+  /** For results keyed by their first column (e.g. verification checks): only the rows that differ. */
+  protected readonly differences = computed(() => {
+    const outcome = this.check()?.outcome;
+    if (!outcome?.actual || !outcome.expected || outcome.verdict === 'correct') return undefined;
+    const differences = diffByFirstColumn(outcome.actual, outcome.expected);
+    return differences?.length ? differences : undefined;
+  });
 
   protected readonly ready = computed(() => this.engine.status() === 'ready' && !this.busy());
   protected readonly hasCode = computed(() => this.code().trim().length > 0);

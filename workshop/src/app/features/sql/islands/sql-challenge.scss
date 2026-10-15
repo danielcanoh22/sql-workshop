@@ -141,3 +141,38 @@ button {
     background: var(--mat-sys-surface-container-high);
   }
 }
+
+.verdict__diff {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+
+  th,
+  td {
+    padding: 0.35rem 0.6rem;
+    text-align: left;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  th {
+    font-size: 0.75rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  td + td {
+    font-family: var(--ws-font-mono);
+  }
+}
+
+.verdict__missing {
+  font-style: italic;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.verdict__full summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 0.25rem 0 0.5rem;
+}

@@ -210,6 +210,32 @@ describe('SqlChallenge', () => {
     expect(expected.querySelectorAll('tbody tr')).toHaveLength(3);
   });
 
+  it('lists only the checks that differ when the first column identifies each row', async () => {
+    const checks = (outcomes: string[]): SqlResultSet => ({
+      command: 'SELECT',
+      columns: [
+        { name: 'item', typeId: 25 },
+        { name: 'outcome', typeId: 25 },
+      ],
+      rows: ['reseña válida', 'valoración 0', 'valoración 6'].map((item, i) => [item, outcomes[i]]),
+      rowCount: 3,
+    });
+    const { root, click } = setup({
+      verdict: 'values',
+      message: 'Después de ejecutar tu SQL, los datos no quedan como se esperaba: algunos valores no coinciden.',
+      actual: checks(['ok', 'ok', 'check']),
+      expected: checks(['ok', 'check', 'check']),
+    });
+
+    await click('.challenge__check');
+
+    const rows = [...root.querySelectorAll('.verdict__diff tbody tr')].map((tr) =>
+      [...tr.querySelectorAll('td')].map((td) => td.textContent?.trim()),
+    );
+    expect(rows).toEqual([['valoración 0', 'ok', 'check']]);
+    expect(root.querySelector('details.verdict__full .verdict__side')).not.toBeNull();
+  });
+
   it('shows the SQL error of an answer that does not run', async () => {
     const { root, click } = setup({
       verdict: 'user-error',

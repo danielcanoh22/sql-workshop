@@ -62,18 +62,47 @@
       } @else if (outcome.verdict === 'user-error') {
         <app-result-view [outcome]="errorOutcome(outcome)" [sql]="check.sql" />
       } @else if (outcome.expected) {
-        <div class="verdict__compare">
-          @if (outcome.actual; as actual) {
+        <ng-template #sideBySide>
+          <div class="verdict__compare">
+            @if (outcome.actual; as actual) {
+              <div class="verdict__side">
+                <p class="verdict__label">Tu resultado</p>
+                <app-result-view [outcome]="asOutcome(actual)" [showTiming]="false" />
+              </div>
+            }
             <div class="verdict__side">
-              <p class="verdict__label">Tu resultado</p>
-              <app-result-view [outcome]="asOutcome(actual)" [showTiming]="false" />
+              <p class="verdict__label">Resultado esperado</p>
+              <app-result-view [outcome]="asOutcome(outcome.expected)" [showTiming]="false" />
             </div>
-          }
-          <div class="verdict__side">
-            <p class="verdict__label">Resultado esperado</p>
-            <app-result-view [outcome]="asOutcome(outcome.expected)" [showTiming]="false" />
           </div>
-        </div>
+        </ng-template>
+
+        @if (differences(); as differences) {
+          <table class="verdict__diff">
+            <thead>
+              <tr>
+                <th scope="col">Lo que no coincide</th>
+                <th scope="col">Tu resultado</th>
+                <th scope="col">Esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of differences; track row.key) {
+                <tr>
+                  <td>{{ row.key }}</td>
+                  <td [class.verdict__missing]="row.actual === undefined">{{ row.actual ?? '(falta)' }}</td>
+                  <td [class.verdict__missing]="row.expected === undefined">{{ row.expected ?? '(sobra)' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <details class="verdict__full">
+            <summary>Ver los resultados completos</summary>
+            <ng-container *ngTemplateOutlet="sideBySide" />
+          </details>
+        } @else {
+          <ng-container *ngTemplateOutlet="sideBySide" />
+        }
       }
     </div>
   }
