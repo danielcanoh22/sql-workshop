@@ -34,7 +34,9 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 | T7 Vertical-slice tutorial SELECT/WHERE + dataset + solutions test | S2, S5, S7, S10 | inline | done | `096a556`; 5 steps (28 runnable blocks, 20 challenges, 2 comparisons); content spec 71 checks, mutation-checked (SELECT * and wrong `best` caught); e2e on all steps; 272 tests, build OK |
 | T8 Checkpoint with the user on the vertical slice | S10 | — | done | User: "Lo probé y parece que está super bien." |
 | T8b Save challenge progress (solved + last answer) | S5 | inline | done | `62e14f8`; RED→GREEN service, island, reader/nav, content spec; e2e: answer and badge survive reload, nav 1/4, restart keeps solved; 289 tests, build OK |
-| T9+ Remaining Part 1, Part 2, optional block, capstones (planned after T8) | S2, S6 | — | pending | |
+| T9 Tutorial 1 El modelo relacional (+ `sql run error` runners) | S2, S5, S7 | inline | done | `5fa8314` (error runners, RED→GREEN) + `31b6e83`; 5 steps, 13 expected-error demos verified to fail |
+| T10 Tutorial 3 Ordenar y paginar | S2, S5, S7, S8 | inline | done | `bfa9469`; 4 steps, 13 ordered challenges; keyset compare: OFFSET 80020 rows/1259 pages vs keyset 20 rows/4 pages; 367 tests, build OK |
+| T11+ Remaining Part 1 (4-12), Part 2, optional block, capstones | S2, S6 | — | pending | |
 
 ## Log
 
@@ -46,3 +48,4 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 - **L6 (2026-10-15):** Interactive blocks are "islands": the marked renderer emits `data-island` placeholders and `MarkdownView` mounts components with `createComponent({ hostElement })` after ngx-markdown's `(ready)`. CodeMirror stays out of the initial bundle (448 kB initial). Browser checks run with puppeteer-core + local Chrome from the scratchpad because the Chrome extension was not connected. The data panel is a right `mat-sidenav` (side mode ≥1400 px, overlay below) with an enlarged diagram view.
 - **L7 (2026-10-15):** Vertical slice complete. Store dataset: 30 customers (3 without city, 3 inactive), 6 categories, 30 products, 90 orders, 180 order lines; customers 29-30 have no orders and products 29-30 were never sold (for LEFT JOIN lessons). Challenges in SELECT/WHERE are unordered because ORDER BY comes in tutorial 3. Verified comparisons: EXTRACT on signup_date = Seq Scan 100030 rows/1226 pages vs range or BETWEEN = Index Scan 49 pages; lower(email) = Seq Scan vs email = Index Scan 4 pages.
 - **L8 (2026-10-15, user):** "Lo probé y parece que está super bien. ¿Estaría bien guardar el progreso de los retos o qué?" → proposed saving solved state and last answer; user: "Dale, implementalo así". Keys are `<tutorial>/<step>/<title>` in `sql-workshop.challenges.v1`; steps declare `challenges` in the manifest, validated by the content spec.
+- **L9 (2026-10-15, user):** "Dale sigue con esos 2 tutoriales" (El modelo relacional, Ordenar y paginar). Findings: PGlite databases use collation `C` (byte order; ICU `unicode` collation available and taught in ORDER BY); sequences jump ahead after snapshot restore (logged 32 at a time), so setup rows referenced by id use explicit ids.
