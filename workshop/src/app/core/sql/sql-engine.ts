@@ -12,6 +12,7 @@ import {
   SqlError,
   SqlResultSet,
   SqlRunOutcome,
+  TransactionState,
 } from './sql.model';
 
 /** The slice of the PGlite API the engine uses; lets tests and the worker inject their own instances. */
@@ -66,8 +67,10 @@ export class SqlEngine {
     this.playground = await this.createDatabase(snapshot);
   }
 
-  run(sql: string): Promise<SqlRunOutcome> {
-    return runScript(this.requirePlayground(), sql);
+  async run(sql: string): Promise<SqlRunOutcome> {
+    const playground = this.requirePlayground();
+    const outcome = await runScript(playground, sql);
+    return { ...outcome, transaction: await transactionState(playground) };
   }
 
   schema(): Promise<SchemaInfo> {
@@ -217,10 +220,29 @@ async function runForCheck(db: Database, sql: string, spec: CheckSpec): Promise<
     await db.exec(spec.setupSql);
   }
   const run = await runScript(db, sql);
+  // An unfinished transaction would be rolled back when a real connection closes: its changes never happened.
+  if (run.ok && (await transactionState(db)) !== 'idle') {
+    return failure({ message: OPEN_TRANSACTION_MESSAGE }, run.durationMs);
+  }
   if (!run.ok || !spec.verifySql) {
     return run;
   }
   return runScript(db, spec.verifySql);
+}
+
+const OPEN_TRANSACTION_MESSAGE =
+  'Tu SQL dejó una transacción abierta: sus cambios no son definitivos. Termínala con COMMIT para guardarlos ' +
+  '(o con ROLLBACK para descartarlos).';
+
+/** `SAVEPOINT` only works inside a transaction, and its error tells whether there is none or it is aborted. */
+export async function transactionState(db: Database): Promise<TransactionState> {
+  try {
+    await db.exec('SAVEPOINT workshop_state_probe');
+    await db.exec('RELEASE SAVEPOINT workshop_state_probe');
+    return 'open';
+  } catch (error) {
+    return (error as { code?: string }).code === '25P02' ? 'failed' : 'idle';
+  }
 }
 
 async function explain(db: Database, sql: string) {

@@ -83,6 +83,44 @@ describe('SqlEngine (real PGlite)', { timeout: 120_000 }, () => {
     });
   });
 
+  describe('transactions in the playground', () => {
+    it('reports whether a transaction was left open, failed or finished', async () => {
+      const open = await engine.run("BEGIN; UPDATE customers SET city = 'Lima' WHERE id = 1");
+      const failed = await engine.run('UPDATE orders SET customer_id = 999 WHERE id = 10');
+      const stillFailed = await engine.run('SELECT 1');
+      const rolledBack = await engine.run('ROLLBACK');
+
+      expect(open.transaction).toBe('open');
+      expect(failed.transaction).toBe('failed');
+      expect(!stillFailed.ok && stillFailed.error.code).toBe('25P02');
+      expect(rolledBack.transaction).toBe('idle');
+    });
+
+    it('keeps uncommitted changes visible inside the transaction and drops them on ROLLBACK', async () => {
+      await engine.run("BEGIN; UPDATE customers SET city = 'Lima' WHERE id = 1");
+      const inside = await engine.run('SELECT city FROM customers WHERE id = 1');
+      await engine.run('ROLLBACK');
+      const after = await engine.run('SELECT city FROM customers WHERE id = 1');
+
+      expect(inside.ok && inside.results[0].rows).toEqual([['Lima']]);
+      expect(after.ok && after.results[0].rows).toEqual([['Madrid']]);
+    });
+
+    it('treats an answer that leaves its transaction open as an error', async () => {
+      const spec = {
+        solutionSql: "BEGIN; UPDATE customers SET city = 'Lima' WHERE id = 1; COMMIT;",
+        verifySql: 'SELECT id, city FROM customers ORDER BY id',
+      };
+
+      const outcome = await engine.check("BEGIN; UPDATE customers SET city = 'Lima' WHERE id = 1;", spec);
+      const committed = await engine.check("BEGIN; UPDATE customers SET city = 'Lima' WHERE id = 1; COMMIT;", spec);
+
+      expect(outcome.verdict).toBe('user-error');
+      expect(outcome.userError?.message).toContain('COMMIT');
+      expect(committed.verdict).toBe('correct');
+    });
+  });
+
   describe('load', () => {
     it('keeps the playground state when the same dataset is loaded again', async () => {
       await engine.run('DELETE FROM orders');

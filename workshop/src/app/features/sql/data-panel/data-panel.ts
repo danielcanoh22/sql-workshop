@@ -27,6 +27,7 @@ export class DataPanel {
 
   protected readonly status = this.engine.status;
   protected readonly dataset = this.engine.dataset;
+  protected readonly transaction = this.engine.transaction;
   protected readonly tables = computed(() => this.store.schema()?.tables ?? []);
   protected readonly tab = signal<Tab>('tables');
   protected readonly confirmingReset = signal(false);
@@ -39,7 +40,7 @@ export class DataPanel {
     effect(() => {
       this.engine.revision();
       const table = this.previewTable();
-      if (table && this.status() === 'ready') {
+      if (table && this.status() === 'ready' && this.transaction() !== 'failed') {
         untracked(() => this.loadPreview(table));
       }
     });

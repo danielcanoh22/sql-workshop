@@ -98,3 +98,27 @@ button {
     font-size: 0.95rem;
   }
 }
+
+.runner__transaction {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--ws-radius-sm);
+  font-size: 0.85rem;
+  background: color-mix(in srgb, var(--mat-sys-tertiary) 14%, transparent);
+
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+    color: var(--mat-sys-tertiary);
+  }
+
+  &--failed {
+    background: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+
+    .material-symbols-outlined {
+      color: var(--mat-sys-error);
+    }
+  }
+}

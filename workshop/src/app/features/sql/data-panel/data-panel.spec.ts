@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { EngineStatus, SqlEngineService } from '../../../core/sql/sql-engine.service';
-import { SchemaInfo, SqlRunOutcome } from '../../../core/sql/sql.model';
+import { SchemaInfo, SqlRunOutcome, TransactionState } from '../../../core/sql/sql.model';
 import { DataPanel } from './data-panel';
 
 const SCHEMA: SchemaInfo = {
@@ -57,6 +57,7 @@ async function setup(status: EngineStatus = 'ready') {
   const engine = {
     status: signal<EngineStatus>(status),
     dataset: signal('store'),
+    transaction: signal<TransactionState>('idle'),
     revision: signal(0),
     schema: vi.fn().mockResolvedValue(SCHEMA),
     preview: vi.fn().mockResolvedValue(PREVIEW),
@@ -149,6 +150,16 @@ describe('DataPanel', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     await fixture.whenStable();
     expect(root.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('explains that a failed transaction blocks reading the tables until ROLLBACK', async () => {
+    const { fixture, root, engine } = await setup();
+
+    engine.transaction.set('failed');
+    await fixture.whenStable();
+
+    expect(root.querySelector('.panel__status--error')?.textContent).toContain('ROLLBACK');
+    expect(root.querySelector('.tables')).toBeNull();
   });
 
   it('explains that PostgreSQL is still starting', async () => {

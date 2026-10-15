@@ -85,6 +85,25 @@ describe('SqlRunner', () => {
     expect(engine.run).toHaveBeenCalledWith('SELECT 1;');
   });
 
+  it('warns when the run left a transaction open or failed', async () => {
+    const { fixture, root, engine, runButton } = setup();
+
+    engine.run.mockResolvedValue({ ...ROWS, transaction: 'open' });
+    runButton().click();
+    await fixture.whenStable();
+    expect(root.querySelector('.runner__transaction')?.textContent).toContain('transacción abierta');
+
+    engine.run.mockResolvedValue({ ok: false, durationMs: 1, error: { message: 'boom' }, transaction: 'failed' });
+    runButton().click();
+    await fixture.whenStable();
+    expect(root.querySelector('.runner__transaction--failed')?.textContent).toContain('ROLLBACK');
+
+    engine.run.mockResolvedValue(ROWS);
+    runButton().click();
+    await fixture.whenStable();
+    expect(root.querySelector('.runner__transaction')).toBeNull();
+  });
+
   it('disables running while PostgreSQL is starting and explains why', () => {
     const { root, runButton } = setup('loading');
 

@@ -6,7 +6,12 @@
       <span class="panel__dataset">{{ dataset }}</span>
     }
     <span class="spacer"></span>
-    <button type="button" class="icon-button" (click)="closed.emit()" aria-label="Cerrar el panel de datos">
+    <button
+      type="button"
+      class="icon-button"
+      (click)="closed.emit()"
+      aria-label="Cerrar el panel de datos"
+    >
       <span class="material-symbols-outlined" aria-hidden="true">close</span>
     </button>
   </header>
@@ -22,100 +27,141 @@
       <p class="panel__status">Este tutorial no tiene una base de datos asociada.</p>
     }
     @case ('ready') {
-      <div class="panel__toolbar">
-        <div class="tabs" role="group" aria-label="Vista">
-          <button type="button" data-tab="tables" [attr.aria-pressed]="tab() === 'tables'" (click)="tab.set('tables')">
-            Tablas
-          </button>
-          <button type="button" data-tab="diagram" [attr.aria-pressed]="tab() === 'diagram'" (click)="tab.set('diagram')">
-            Diagrama
-          </button>
-        </div>
-        <button type="button" class="panel__reset" (click)="confirmingReset.set(true)" [disabled]="confirmingReset()">
-          <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>Restablecer
-        </button>
-      </div>
-
-      @if (confirmingReset()) {
-        <div class="panel__confirm" role="alert">
-          <p>¿Volver a los datos originales? Se perderán los cambios que hiciste.</p>
-          <button type="button" class="panel__confirm-yes" (click)="confirmReset()">Sí, restablecer</button>
-          <button type="button" class="panel__confirm-no" (click)="confirmingReset.set(false)">Cancelar</button>
-        </div>
-      }
-
-      @if (tab() === 'tables') {
-        <ul class="tables">
-          @for (table of tables(); track table.name) {
-            <li class="table">
-              <p class="table__summary">
-                <span class="table__name">{{ table.name }}</span>
-                <span class="table__count">{{ rowsText(table.rowCount) }}</span>
-              </p>
-              <ul class="columns">
-                @for (column of table.columns; track column.name) {
-                  <li class="column">
-                    @if (column.isPrimaryKey) {
-                      <span class="material-symbols-outlined column__icon" title="Clave primaria">key</span>
-                    } @else if (column.references) {
-                      <span class="material-symbols-outlined column__icon" title="Clave foránea">link</span>
-                    }
-                    <span class="column__name">{{ column.name }}</span>
-                    <span class="column__type">{{ column.type }}</span>
-                    @if (column.nullable) {
-                      <span class="column__badge" title="Admite valores NULL">NULL</span>
-                    }
-                    @if (column.references; as ref) {
-                      <span class="column__ref">→ {{ ref.table }}.{{ ref.column }}</span>
-                    }
-                  </li>
-                }
-              </ul>
-              <button
-                type="button"
-                class="table__preview"
-                [attr.aria-expanded]="previewTable() === table.name"
-                (click)="togglePreview(table.name)"
-              >
-                {{ previewTable() === table.name ? 'Ocultar filas' : 'Ver filas' }}
-              </button>
-              @if (previewTable() === table.name) {
-                @if (preview(); as preview) {
-                  <app-result-view [outcome]="preview" />
-                } @else {
-                  <p class="panel__status">Cargando…</p>
-                }
-              }
-            </li>
-          } @empty {
-            <li class="panel__status">La base de datos no tiene tablas.</li>
-          }
-        </ul>
+      @if (transaction() === 'failed') {
+        <p class="panel__status panel__status--error" role="alert">
+          La transacción falló y PostgreSQL ignora todo lo que llega, incluida la lectura de las
+          tablas. Ejecuta ROLLBACK en un bloque para continuar.
+        </p>
       } @else {
-        <button type="button" class="diagram__expand" (click)="diagramExpanded.set(true)">
-          <span class="material-symbols-outlined" aria-hidden="true">open_in_full</span>Ver en grande
-        </button>
-        <app-schema-diagram [tables]="tables()" />
-      }
-
-      @if (diagramExpanded()) {
-        <div class="overlay" (click)="diagramExpanded.set(false)">
-          <div
-            class="overlay__dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="diagram-dialog-title"
-            (click)="$event.stopPropagation()"
-          >
-            <header class="overlay__header">
-              <h2 id="diagram-dialog-title">Diagrama de relaciones</h2>
-              <button type="button" class="icon-button" (click)="diagramExpanded.set(false)" aria-label="Cerrar">
-                <span class="material-symbols-outlined" aria-hidden="true">close</span>
-              </button>
-            </header>
-            <app-schema-diagram [tables]="tables()" />
+        @if (transaction() === 'open') {
+          <p class="panel__status">
+            Estás dentro de una transacción: ves tus cambios, pero aún no son definitivos.
+          </p>
+        }
+        <div class="panel__toolbar">
+          <div class="tabs" role="group" aria-label="Vista">
+            <button
+              type="button"
+              data-tab="tables"
+              [attr.aria-pressed]="tab() === 'tables'"
+              (click)="tab.set('tables')"
+            >
+              Tablas
+            </button>
+            <button
+              type="button"
+              data-tab="diagram"
+              [attr.aria-pressed]="tab() === 'diagram'"
+              (click)="tab.set('diagram')"
+            >
+              Diagrama
+            </button>
           </div>
+          <button
+            type="button"
+            class="panel__reset"
+            (click)="confirmingReset.set(true)"
+            [disabled]="confirmingReset()"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>Restablecer
+          </button>
         </div>
+
+        @if (confirmingReset()) {
+          <div class="panel__confirm" role="alert">
+            <p>¿Volver a los datos originales? Se perderán los cambios que hiciste.</p>
+            <button type="button" class="panel__confirm-yes" (click)="confirmReset()">
+              Sí, restablecer
+            </button>
+            <button type="button" class="panel__confirm-no" (click)="confirmingReset.set(false)">
+              Cancelar
+            </button>
+          </div>
+        }
+
+        @if (tab() === 'tables') {
+          <ul class="tables">
+            @for (table of tables(); track table.name) {
+              <li class="table">
+                <p class="table__summary">
+                  <span class="table__name">{{ table.name }}</span>
+                  <span class="table__count">{{ rowsText(table.rowCount) }}</span>
+                </p>
+                <ul class="columns">
+                  @for (column of table.columns; track column.name) {
+                    <li class="column">
+                      @if (column.isPrimaryKey) {
+                        <span class="material-symbols-outlined column__icon" title="Clave primaria"
+                          >key</span
+                        >
+                      } @else if (column.references) {
+                        <span class="material-symbols-outlined column__icon" title="Clave foránea"
+                          >link</span
+                        >
+                      }
+                      <span class="column__name">{{ column.name }}</span>
+                      <span class="column__type">{{ column.type }}</span>
+                      @if (column.nullable) {
+                        <span class="column__badge" title="Admite valores NULL">NULL</span>
+                      }
+                      @if (column.references; as ref) {
+                        <span class="column__ref">→ {{ ref.table }}.{{ ref.column }}</span>
+                      }
+                    </li>
+                  }
+                </ul>
+                <button
+                  type="button"
+                  class="table__preview"
+                  [attr.aria-expanded]="previewTable() === table.name"
+                  (click)="togglePreview(table.name)"
+                >
+                  {{ previewTable() === table.name ? 'Ocultar filas' : 'Ver filas' }}
+                </button>
+                @if (previewTable() === table.name) {
+                  @if (preview(); as preview) {
+                    <app-result-view [outcome]="preview" />
+                  } @else {
+                    <p class="panel__status">Cargando…</p>
+                  }
+                }
+              </li>
+            } @empty {
+              <li class="panel__status">La base de datos no tiene tablas.</li>
+            }
+          </ul>
+        } @else {
+          <button type="button" class="diagram__expand" (click)="diagramExpanded.set(true)">
+            <span class="material-symbols-outlined" aria-hidden="true">open_in_full</span>Ver en
+            grande
+          </button>
+          <app-schema-diagram [tables]="tables()" />
+        }
+
+        @if (diagramExpanded()) {
+          <div class="overlay" (click)="diagramExpanded.set(false)">
+            <div
+              class="overlay__dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="diagram-dialog-title"
+              (click)="$event.stopPropagation()"
+            >
+              <header class="overlay__header">
+                <h2 id="diagram-dialog-title">Diagrama de relaciones</h2>
+                <button
+                  type="button"
+                  class="icon-button"
+                  (click)="diagramExpanded.set(false)"
+                  aria-label="Cerrar"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+              </header>
+              <app-schema-diagram [tables]="tables()" />
+            </div>
+          </div>
+        }
       }
     }
   }

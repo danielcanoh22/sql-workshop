@@ -12,12 +12,26 @@
         <span class="material-symbols-outlined" aria-hidden="true">undo</span>Restaurar
       </button>
     }
-    <button type="button" class="runner__run" [disabled]="!canRun()" (click)="run()" title="Ctrl + Enter">
-      <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>{{ running() ? 'Ejecutando…' : 'Ejecutar' }}
+    <button
+      type="button"
+      class="runner__run"
+      [disabled]="!canRun()"
+      (click)="run()"
+      title="Ctrl + Enter"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span
+      >{{ running() ? 'Ejecutando…' : 'Ejecutar' }}
     </button>
   </header>
 
-  <app-sql-editor #editor [code]="props().code" [schema]="completion()" label="Editor SQL" (codeChange)="code.set($event)" (runRequested)="run()" />
+  <app-sql-editor
+    #editor
+    [code]="props().code"
+    [schema]="completion()"
+    label="Editor SQL"
+    (codeChange)="code.set($event)"
+    (runRequested)="run()"
+  />
 
   @switch (status()) {
     @case ('loading') {
@@ -36,6 +50,22 @@
   @if (outcome(); as outcome) {
     <div class="runner__output" aria-live="polite">
       <app-result-view [outcome]="outcome.result" [sql]="outcome.sql" />
+      @switch (outcome.result.transaction) {
+        @case ('open') {
+          <p class="runner__transaction">
+            <span class="material-symbols-outlined" aria-hidden="true">pending</span>
+            Hay una transacción abierta: tus cambios todavía no son definitivos. Termínala con
+            COMMIT (guardar) o ROLLBACK (descartar).
+          </p>
+        }
+        @case ('failed') {
+          <p class="runner__transaction runner__transaction--failed">
+            <span class="material-symbols-outlined" aria-hidden="true">block</span>
+            La transacción falló: PostgreSQL ignorará todo lo que envíes hasta que ejecutes
+            ROLLBACK.
+          </p>
+        }
+      }
     </div>
   }
 </div>

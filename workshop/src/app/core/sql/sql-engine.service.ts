@@ -2,7 +2,15 @@ import { DOCUMENT, Injectable, InjectionToken, inject, signal } from '@angular/c
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { EngineMethod, WorkerRequest, WorkerResponse } from './sql-protocol';
-import { CheckOutcome, CheckSpec, CompareOutcome, CompareVariant, SchemaInfo, SqlRunOutcome } from './sql.model';
+import {
+  CheckOutcome,
+  CheckSpec,
+  CompareOutcome,
+  CompareVariant,
+  SchemaInfo,
+  SqlRunOutcome,
+  TransactionState,
+} from './sql.model';
 
 /** The part of `Worker` the service uses, so tests can provide a fake. */
 export interface WorkerLike {
@@ -40,12 +48,15 @@ export class SqlEngineService {
   private readonly statusSignal = signal<EngineStatus>('idle');
   private readonly datasetSignal = signal<string | undefined>(undefined);
   private readonly revisionSignal = signal(0);
+  private readonly transactionSignal = signal<TransactionState>('idle');
 
   readonly status = this.statusSignal.asReadonly();
   /** Dataset currently loaded in the playground. */
   readonly dataset = this.datasetSignal.asReadonly();
   /** Increases after every operation that may have changed the playground; data views re-read on change. */
   readonly revision = this.revisionSignal.asReadonly();
+  /** Whether the playground is inside a transaction (after BEGIN) and whether it failed. */
+  readonly transaction = this.transactionSignal.asReadonly();
 
   private worker: WorkerLike | undefined;
   private ready: Promise<void> | undefined;
@@ -66,7 +77,9 @@ export class SqlEngineService {
 
   async run(sql: string): Promise<SqlRunOutcome> {
     try {
-      return (await this.call('run', [sql], true)) as SqlRunOutcome;
+      const outcome = (await this.call('run', [sql], true)) as SqlRunOutcome;
+      this.transactionSignal.set(outcome.transaction ?? 'idle');
+      return outcome;
     } catch (error) {
       if (error instanceof SqlTimeoutError) {
         return { ok: false, error: { message: error.message }, durationMs: this.timeoutMs };
@@ -79,6 +92,7 @@ export class SqlEngineService {
 
   async reset(): Promise<void> {
     await this.call('reset', []);
+    this.transactionSignal.set('idle');
     this.bumpRevision();
   }
 
@@ -111,6 +125,7 @@ export class SqlEngineService {
       const seed = await this.seedFor(dataset);
       await this.call('load', [dataset, seed]);
       this.datasetSignal.set(dataset);
+      this.transactionSignal.set('idle');
       this.statusSignal.set('ready');
       this.bumpRevision();
     } catch (error) {

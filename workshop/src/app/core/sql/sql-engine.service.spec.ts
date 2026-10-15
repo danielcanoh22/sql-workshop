@@ -111,6 +111,24 @@ describe('SqlEngineService', () => {
     expect(service.revision()).toBe(before + 1);
   });
 
+  it('tracks the transaction state reported by each run and clears it on reset', async () => {
+    const { service, http, workers } = setup();
+    await openShop(service, http, workers);
+
+    expect(service.transaction()).toBe('idle');
+    const running = service.run('BEGIN');
+    await flush();
+    workers[0].reply('run', { ...OK, transaction: 'open' });
+    await running;
+    expect(service.transaction()).toBe('open');
+
+    const resetting = service.reset();
+    await flush();
+    workers[0].reply('reset');
+    await resetting;
+    expect(service.transaction()).toBe('idle');
+  });
+
   it('resets the playground and bumps the revision', async () => {
     const { service, http, workers } = setup();
     await openShop(service, http, workers);

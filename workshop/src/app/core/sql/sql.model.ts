@@ -25,9 +25,26 @@ export interface SqlError {
   readonly hint?: string;
 }
 
+/**
+ * State of the playground connection after a script: `open` after a `BEGIN` without `COMMIT`/`ROLLBACK`,
+ * `failed` when a statement failed inside that transaction (PostgreSQL ignores everything until `ROLLBACK`).
+ */
+export type TransactionState = 'idle' | 'open' | 'failed';
+
 export type SqlRunOutcome =
-  | { readonly ok: true; readonly results: readonly SqlResultSet[]; readonly durationMs: number }
-  | { readonly ok: false; readonly error: SqlError; readonly durationMs: number };
+  | {
+      readonly ok: true;
+      readonly results: readonly SqlResultSet[];
+      readonly durationMs: number;
+      /** Set by playground runs. */
+      readonly transaction?: TransactionState;
+    }
+  | {
+      readonly ok: false;
+      readonly error: SqlError;
+      readonly durationMs: number;
+      readonly transaction?: TransactionState;
+    };
 
 export interface SchemaColumn {
   readonly name: string;
