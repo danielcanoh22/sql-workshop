@@ -25,11 +25,6 @@ function comingSoon(
 /** Planned syllabus. Each entry becomes its own manifest file once its content exists. */
 export const COMING_SOON: readonly TutorialManifest[] = [
   // Part 1: general SQL
-  comingSoon(7, 'modifying-data', 'Modificar datos', 'INSERT, UPDATE y DELETE sin romper nada', 'intermediate', [
-    'INSERT',
-    'UPDATE',
-    'DELETE',
-  ]),
   comingSoon(8, 'tables-constraints', 'Tablas y restricciones', 'CREATE, ALTER y reglas que protegen tus datos', 'intermediate', [
     'CREATE TABLE',
     'ALTER TABLE',

@@ -72,6 +72,10 @@ GROUP BY c.id, c.first_name;
 PostgreSQL lee cada tabla **una sola vez**, empareja las filas con un *hash join* y cuenta por grupo. Cuando necesitas un resultado para muchas filas, piensa en **conjuntos** (un JOIN y un `GROUP BY`), no en un cálculo fila a fila.
 :::
 
+:::warning ¿Por qué tardan parecido?
+Fíjate en el tiempo: en tu navegador, las dos variantes pueden tardar casi lo mismo. Aquí toda la base de datos está en memoria, y leer una página de memoria es baratísimo. En un servidor real, con datos que no caben en memoria, otros usuarios compitiendo por el disco y tablas mucho más grandes, leer **más de 150 veces más páginas** es lo que separa una consulta de milisegundos de una que tarda segundos y frena al resto del sistema. Por eso el workshop usa las páginas leídas como medida principal: no depende de tu máquina.
+:::
+
 :::tip ¿Entonces nunca uso subconsultas correlacionadas?
 Sí las usas: son perfectas para pocas filas (las 6 categorías del primer paso), para `EXISTS` (que PostgreSQL convierte en un semi-join) y para casos como "el último de cada grupo" cuando hay un índice adecuado. Lo que conviene evitar es una subconsulta correlacionada en el `SELECT` de una consulta que devuelve miles de filas.
 :::

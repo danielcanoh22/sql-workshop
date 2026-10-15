@@ -1,4 +1,5 @@
 import { COMING_SOON } from './manifests/coming-soon.manifests';
+import { MODIFYING_DATA } from './manifests/modifying-data.manifest';
 import { SUBQUERIES_CTES } from './manifests/subqueries-ctes.manifest';
 import { JOINS } from './manifests/joins.manifest';
 import { AGGREGATES_GROUP_BY } from './manifests/aggregates-group-by.manifest';
@@ -20,6 +21,7 @@ export const TUTORIAL_REGISTRY: readonly TutorialManifest[] = [
   AGGREGATES_GROUP_BY,
   JOINS,
   SUBQUERIES_CTES,
+  MODIFYING_DATA,
   ...COMING_SOON,
 ];
 
