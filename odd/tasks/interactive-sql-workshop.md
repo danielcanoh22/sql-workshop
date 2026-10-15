@@ -44,7 +44,12 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 | T16 Tutorial 8 Tablas y restricciones (+ runners run in order per step in content spec) | S2, S5, S7 | inline | done | `7e81357`; 9 schema challenges checked by behavior; 5 typical wrong answers caught |
 | T17 Diff of differing checks in wrong verdicts | S5 | inline | done | `dd5edd0`; RED→GREEN diffByFirstColumn + challenge view |
 | T18 Tutorial 9 Modelado de datos | S2, S5, S7 | inline | done | `43b656d`; 6 challenges incl. data migration and library schema; 4 wrong answers caught; 506 tests, build OK |
-| T19+ Remaining Part 1 (10-12), Part 2, optional block, capstones | S2, S6 | — | pending | |
+| T19 Transaction state in the playground (banners, panel, open-transaction answers rejected) | S5, S9 | inline | done | `48ce54a` + spec fix `c6babc5` (a commit went in with 4 failing reader tests; fixed and now committing only after a green suite) |
+| T20 `sql example` fences in conceptual solutions | S5 | inline | done | `643b683`; RED→GREEN |
+| T21 Tutorial 10 Transacciones | S2, S5, S7 | inline | done | `ca28485`; e2e: open/failed banners, panel, no-COMMIT answer rejected |
+| T22 Tutorial 11 Expresiones y funciones | S2, S5, S7, S8 | inline | done | `a2d2545`; date_trunc compare 1275 vs 61 pages |
+| T23 Tutorial 12 Índices y EXPLAIN | S2, S5, S7, S8 | inline | done | `0272c4f`; compares 1226 vs 4 and 1282 vs 6 pages; index challenges checked by indexed columns; 583 tests, build OK |
+| T24+ Part 2 (13-19), optional block (20-22), capstones (23-26), SQL injection demo | S2, S6, S8 | — | pending | |
 
 ## Log
 
@@ -60,3 +65,4 @@ Branch: `feat/interactive-sql-workshop` · Delivery: `exception-ok` (local repo 
 - **L10 (2026-10-15, user):** "Dale, seguí con esos dos tutoriales" (Agregaciones y GROUP BY, JOINs). Beginner level complete (tutorials 1-5). PostgreSQL moves non-aggregate HAVING conditions to WHERE (identical plans), so it is taught as a readability rule, not a performance one.
 - **L11 (2026-10-15, user):** "Dale, seguí con esos dos tutoriales" (Subconsultas y CTEs, Modificar datos). In-browser timings can be similar even when pages differ 150x (everything is in memory); content explains it and keeps pages as the headline metric.
 - **L12 (2026-10-15, user):** "Dale" (Tablas y restricciones, Modelado de datos). Schema challenges are checked by behavior through `workshop.try(statement, result_query)` in the store dataset (schema `workshop`, invisible in the panel). The content spec runs each step's runnable blocks in order (they build on each other). Dev server cold compile makes first page loads take up to ~16 s in e2e after a restart; not an app issue.
+- **L13 (2026-10-15, user):** "Sigue con esos" (Transacciones, Expresiones y funciones, Índices y EXPLAIN). Intermediate level complete (tutorials 1-12). PGlite has no Spanish locale (to_char month names in English); date_trunc on date returns timestamptz (taught with ::date). EXPLAIN claims are verified against real plans before writing them.
