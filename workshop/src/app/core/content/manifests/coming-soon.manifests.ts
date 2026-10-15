@@ -25,11 +25,6 @@ function comingSoon(
 /** Planned syllabus. Each entry becomes its own manifest file once its content exists. */
 export const COMING_SOON: readonly TutorialManifest[] = [
   // Part 1: general SQL
-  comingSoon(10, 'transactions', 'Transacciones', 'Todo o nada: BEGIN, COMMIT y ROLLBACK', 'intermediate', [
-    'BEGIN',
-    'COMMIT',
-    'ROLLBACK',
-  ]),
   comingSoon(11, 'expressions-functions', 'Expresiones y funciones', 'CASE, COALESCE y funciones de texto y fecha', 'intermediate', [
     'CASE',
     'COALESCE',
