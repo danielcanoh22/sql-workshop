@@ -1,4 +1,5 @@
 import { COMING_SOON } from './manifests/coming-soon.manifests';
+import { DATA_MODELING } from './manifests/data-modeling.manifest';
 import { TABLES_CONSTRAINTS } from './manifests/tables-constraints.manifest';
 import { MODIFYING_DATA } from './manifests/modifying-data.manifest';
 import { SUBQUERIES_CTES } from './manifests/subqueries-ctes.manifest';
@@ -24,6 +25,7 @@ export const TUTORIAL_REGISTRY: readonly TutorialManifest[] = [
   SUBQUERIES_CTES,
   MODIFYING_DATA,
   TABLES_CONSTRAINTS,
+  DATA_MODELING,
   ...COMING_SOON,
 ];
 
