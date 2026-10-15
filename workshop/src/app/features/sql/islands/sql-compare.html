@@ -1,0 +1,40 @@
+<section class="compare">
+  <header class="compare__header">
+    <span class="material-symbols-outlined compare__icon" aria-hidden="true">compare_arrows</span>
+    <span class="compare__title">
+      <span class="compare__kicker">Compara</span>
+      @if (props().title; as title) {
+        {{ title }}
+      }
+    </span>
+    <button type="button" class="compare__run" [disabled]="!canRun()" (click)="run()">
+      <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>{{ running() ? 'Comparando…' : 'Ejecutar y comparar' }}
+    </button>
+  </header>
+
+  <div class="compare__queries">
+    @for (variant of props().variants; track $index; let i = $index) {
+      <div class="compare__query">
+        <p class="compare__variant-label">{{ variant.label }}</p>
+        <app-sql-editor
+          [code]="variant.sql"
+          [schema]="completion()"
+          [label]="'Consulta: ' + variant.label"
+          (codeChange)="setQuery(i, $event)"
+          (runRequested)="run()"
+        />
+      </div>
+    }
+  </div>
+
+  @if (items(); as items) {
+    <div class="compare__results" aria-live="polite">
+      <app-comparison-view [items]="items" />
+    </div>
+  } @else {
+    <p class="compare__prompt">
+      <span class="material-symbols-outlined" aria-hidden="true">psychology_alt</span>
+      Antes de ejecutar: ¿cuál crees que hará menos trabajo, y por qué?
+    </p>
+  }
+</section>

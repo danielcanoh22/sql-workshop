@@ -34,7 +34,7 @@ type CalloutKind =
   | 'checkpoint'
   | 'troubleshooting'
   | 'recap';
-type ContainerKind = CalloutKind | 'challenge' | 'hint' | 'solution';
+type ContainerKind = CalloutKind | 'challenge' | 'hint' | 'solution' | 'compare';
 
 interface CalloutMeta {
   readonly label: string;
@@ -57,12 +57,15 @@ const CONTAINER_KINDS: ReadonlySet<string> = new Set<ContainerKind>([
   'challenge',
   'hint',
   'solution',
+  'compare',
 ]);
 
 interface ContainerToken extends Tokens.Generic {
   type: typeof TOKEN_TYPE;
   kind: ContainerKind;
   titleTokens: Token[];
+  /** Raw title text, for islands that render it themselves. */
+  titleText: string;
   tokens: Token[];
   /** 1-based position among the hints of the parent challenge. */
   hintNumber?: number;
@@ -124,6 +127,7 @@ function tokenizeContainer(this: TokenizerThis, src: string): ContainerToken | u
     raw: openingRaw + rest.slice(0, closingEnd + trailingNewline),
     kind: kind as ContainerKind,
     titleTokens: this.lexer.inlineTokens(title.trim()),
+    titleText: title.trim(),
     tokens: this.lexer.blockTokens(body, []),
   };
 
@@ -192,6 +196,10 @@ function renderContainer(this: RendererThis, token: Tokens.Generic): string {
     );
   }
 
+  if (container.kind === 'compare') {
+    return renderCompare(this, container);
+  }
+
   const body = this.parser.parse(container.tokens);
   switch (container.kind) {
     case 'hint':
@@ -222,26 +230,88 @@ const COPY_BUTTON =
   '<button type="button" class="code-block__copy" data-copy aria-label="Copiar código">' +
   `${icon('content_copy', 'code-block__copy-icon')}<span class="code-block__copy-label">Copiar</span></button>`;
 
+export interface CompareVariantProps {
+  readonly label: string;
+  readonly sql: string;
+  readonly setupSql?: string;
+  readonly best?: boolean;
+  /** Rendered Markdown explaining this variant; shown after the comparison runs. */
+  readonly explanationHtml: string;
+}
+
+export interface CompareIslandProps {
+  readonly title?: string;
+  readonly setupSql?: string;
+  readonly variants: readonly CompareVariantProps[];
+}
+
+/**
+ * `:::compare Title` holds ```sql variant label="..." [best] fences, each followed by the Markdown that explains it.
+ * ```sql setup runs once before every variant (e.g. to generate a large table); ```sql variant-setup prepares only
+ * the next variant (e.g. `CREATE INDEX`). Content before the first variant stays as an introduction.
+ */
+function renderCompare(renderer: RendererThis, container: ContainerToken): string {
+  const intro: Token[] = [];
+  const variants: { label: string; sql: string; setupSql?: string; best?: boolean; explanation: Token[] }[] = [];
+  let setupSql: string | undefined;
+  let nextVariantSetup: string | undefined;
+
+  for (const child of container.tokens) {
+    const code = child.type === 'code' ? (child as Tokens.Code) : undefined;
+    const info = code ? parseInfoString(code.lang) : undefined;
+    if (code && info?.language === 'sql' && info.flags.has('setup')) {
+      setupSql = code.text;
+    } else if (code && info?.language === 'sql' && info.flags.has('variant-setup')) {
+      nextVariantSetup = code.text;
+    } else if (code && info?.language === 'sql' && info.flags.has('variant')) {
+      variants.push({
+        label: info.attrs['label'] ?? `Opción ${String.fromCharCode(65 + variants.length)}`,
+        sql: code.text,
+        ...(nextVariantSetup !== undefined ? { setupSql: nextVariantSetup } : {}),
+        ...(info.flags.has('best') ? { best: true } : {}),
+        explanation: [],
+      });
+      nextVariantSetup = undefined;
+    } else if (variants.length) {
+      variants[variants.length - 1].explanation.push(child);
+    } else {
+      intro.push(child);
+    }
+  }
+
+  const props: CompareIslandProps = {
+    ...(container.titleText ? { title: container.titleText } : {}),
+    ...(setupSql !== undefined ? { setupSql } : {}),
+    variants: variants.map(({ explanation, ...variant }) => ({
+      ...variant,
+      explanationHtml: renderer.parser.parse(explanation),
+    })),
+  };
+  return `<div class="compare-block">${renderer.parser.parse(intro)}${islandHtml('compare', props)}</div>\n`;
+}
+
 interface InfoString {
   readonly language: string;
   readonly title: string | undefined;
   /** Bare words after the language, e.g. `run` in `sql run title="..."`. */
   readonly flags: ReadonlySet<string>;
+  /** `key="value"` pairs, e.g. `label` in `sql variant label="Con índice"`. */
+  readonly attrs: Readonly<Record<string, string>>;
 }
 
 /** Splits a fence info string such as `sql run title="queries/top-customers.sql"`. */
 export function parseInfoString(info: string | undefined): InfoString {
   const trimmed = (info ?? '').trim();
   const language = /^\S*/.exec(trimmed)?.[0] ?? '';
-  const title = /\btitle="([^"]*)"/.exec(trimmed)?.[1];
+  const rest = trimmed.slice(language.length);
+  const attrs = Object.fromEntries([...rest.matchAll(/\b(\w+)="([^"]*)"/g)].map(([, key, value]) => [key, value]));
   const flags = new Set(
-    trimmed
-      .slice(language.length)
+    rest
       .replace(/\b\w+="[^"]*"/g, '')
       .split(/\s+/)
       .filter(Boolean),
   );
-  return { language, title, flags };
+  return { language, title: attrs['title'], flags, attrs };
 }
 
 /**

@@ -71,6 +71,14 @@ SELECT name FROM customers;
   with ```` ```sql ordered ````, row order are not), so any correct query passes. Optional hidden fences inside
   the challenge: ```` ```sql starter ```` (initial editor content), ```` ```sql verify ```` (query compared after
   data-changing answers, e.g. `UPDATE`) and ```` ```sql setup ```` (runs before answer and solution).
+- `:::compare Title` shows several ways to get the same data and compares them with `EXPLAIN (ANALYZE, BUFFERS)`
+  on the same fresh copy of the dataset: same result?, rows returned, rows read, **pages read** (the headline,
+  machine-independent metric), time (indicative), scan types and the plan tree. Inside it, every
+  ```` ```sql variant label="..." ```` fence (add `best` to the recommended one) is a single editable statement
+  followed by the Markdown that explains it, shown after the run so learners predict first.
+  ```` ```sql setup ```` runs before all variants (e.g. `generate_series` to make the data large enough to matter);
+  ```` ```sql variant-setup ```` prepares only the next variant (e.g. `CREATE INDEX`); each variant runs in a
+  transaction that is rolled back. Correct challenge answers can also be compared with the recommended solution.
 - Interactive blocks are "islands": the renderer emits a `data-island` placeholder and `MarkdownView` mounts the
   component registered in `features/sql/islands/sql-islands.ts`.
 - Highlighted languages: `sql`, `json`, `bash`.

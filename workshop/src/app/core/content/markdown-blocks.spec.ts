@@ -37,6 +37,68 @@ const CHALLENGE = [
 ].join('\n');
 
 describe('workshop markdown blocks', () => {
+  describe('compare blocks', () => {
+    const COMPARE = [
+      ':::compare Buscar por email',
+      '¿Cuál crees que es más rápida?',
+      '',
+      '```sql setup',
+      'CREATE INDEX customers_email_idx ON customers (email);',
+      '```',
+      '',
+      '```sql variant label="Función sobre la columna"',
+      "SELECT id FROM customers WHERE lower(email) = 'ana@example.com';",
+      '```',
+      'La función impide usar el **índice**.',
+      '',
+      '```sql variant-setup',
+      'ANALYZE customers;',
+      '```',
+      '```sql variant label="Comparación directa" best',
+      "SELECT id FROM customers WHERE email = 'ana@example.com';",
+      '```',
+      'Usa el índice.',
+      ':::',
+    ].join('\n');
+
+    it('turns a :::compare block into a compare island with every variant', () => {
+      const [island] = islandsOf(render(COMPARE));
+
+      expect(island.name).toBe('compare');
+      expect(island.props).toEqual({
+        title: 'Buscar por email',
+        setupSql: 'CREATE INDEX customers_email_idx ON customers (email);',
+        variants: [
+          {
+            label: 'Función sobre la columna',
+            sql: "SELECT id FROM customers WHERE lower(email) = 'ana@example.com';",
+            explanationHtml: '<p>La función impide usar el <strong>índice</strong>.</p>\n',
+          },
+          {
+            label: 'Comparación directa',
+            sql: "SELECT id FROM customers WHERE email = 'ana@example.com';",
+            setupSql: 'ANALYZE customers;',
+            best: true,
+            explanationHtml: '<p>Usa el índice.</p>\n',
+          },
+        ],
+      });
+    });
+
+    it('keeps the introduction as regular content before the island', () => {
+      const html = render(COMPARE);
+
+      expect(html.indexOf('¿Cuál crees que es más rápida?')).toBeLessThan(html.indexOf('data-island="compare"'));
+      expect(html).not.toContain('<pre>');
+    });
+
+    it('labels variants without a label with letters', () => {
+      const [island] = islandsOf(render(':::compare\n```sql variant\nSELECT 1;\n```\n```sql variant\nSELECT 2;\n```\n:::'));
+
+      expect((island.props['variants'] as { label: string }[]).map((v) => v.label)).toEqual(['Opción A', 'Opción B']);
+    });
+  });
+
   describe('auto-checked challenges', () => {
     it('adds a challenge island with the reference solution, its flags and the starter code', () => {
       const [island] = islandsOf(render(CHALLENGE));

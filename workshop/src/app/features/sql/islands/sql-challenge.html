@@ -39,9 +39,18 @@
         {{ outcome.message }}
       </p>
 
-      @if (outcome.verdict === 'user-error') {
+      @if (outcome.verdict === 'correct') {
+        @if (comparison(); as items) {
+          <app-comparison-view [items]="items" />
+        } @else {
+          <button type="button" class="verdict__compare-solution" [disabled]="!ready()" (click)="compareWithSolution()">
+            <span class="material-symbols-outlined" aria-hidden="true">compare_arrows</span>
+            {{ busy() === 'compare' ? 'Comparando…' : 'Comparar con la solución recomendada' }}
+          </button>
+        }
+      } @else if (outcome.verdict === 'user-error') {
         <app-result-view [outcome]="errorOutcome(outcome)" [sql]="check.sql" />
-      } @else if (outcome.verdict !== 'correct' && outcome.expected) {
+      } @else if (outcome.expected) {
         <div class="verdict__compare">
           @if (outcome.actual; as actual) {
             <div class="verdict__side">

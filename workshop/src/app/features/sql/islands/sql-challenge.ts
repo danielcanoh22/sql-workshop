@@ -4,6 +4,7 @@ import { IslandComponent } from '../../../core/content/islands';
 import { SchemaStore } from '../../../core/sql/schema.store';
 import { SqlEngineService } from '../../../core/sql/sql-engine.service';
 import { CheckOutcome, CheckSpec, SqlResultSet, SqlRunOutcome } from '../../../core/sql/sql.model';
+import { ComparisonItem, ComparisonView } from '../ui/comparison-view';
 import { ResultView } from '../ui/result-view';
 import { SqlEditor } from '../ui/sql-editor';
 
@@ -14,7 +15,7 @@ import { SqlEditor } from '../ui/sql-editor';
  */
 @Component({
   selector: 'app-sql-challenge',
-  imports: [SqlEditor, ResultView],
+  imports: [SqlEditor, ResultView, ComparisonView],
   templateUrl: './sql-challenge.html',
   styleUrl: './sql-challenge.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,9 +28,10 @@ export class SqlChallenge implements IslandComponent<ChallengeIslandProps> {
   protected readonly completion = inject(SchemaStore).completion;
   protected readonly starter = computed(() => this.props().starter ?? '');
   protected readonly code = linkedSignal(() => this.starter());
-  protected readonly busy = signal<'run' | 'check' | undefined>(undefined);
+  protected readonly busy = signal<'run' | 'check' | 'compare' | undefined>(undefined);
   protected readonly runOutcome = signal<{ sql: string; result: SqlRunOutcome } | undefined>(undefined);
   protected readonly check = signal<{ sql: string; outcome: CheckOutcome } | undefined>(undefined);
+  protected readonly comparison = signal<ComparisonItem[] | undefined>(undefined);
 
   protected readonly ready = computed(() => this.engine.status() === 'ready' && !this.busy());
   protected readonly hasCode = computed(() => this.code().trim().length > 0);
@@ -56,8 +58,32 @@ export class SqlChallenge implements IslandComponent<ChallengeIslandProps> {
       ...(setupSql !== undefined ? { setupSql } : {}),
     };
     this.busy.set('check');
+    this.comparison.set(undefined);
     try {
       this.check.set({ sql, outcome: await this.engine.check(sql, spec) });
+    } finally {
+      this.busy.set(undefined);
+    }
+  }
+
+  /** After a correct answer: how much work did it take compared with the recommended solution? */
+  protected async compareWithSolution(): Promise<void> {
+    const answer = this.check()?.sql;
+    if (!answer || !this.ready()) return;
+    const { solutionSql, setupSql } = this.props();
+    this.busy.set('compare');
+    try {
+      const outcome = await this.engine.compare(
+        [
+          { id: 'answer', sql: answer },
+          { id: 'solution', sql: solutionSql },
+        ],
+        setupSql,
+      );
+      this.comparison.set([
+        { label: 'Tu solución', sql: answer, outcome: outcome.variants[0] },
+        { label: 'Solución recomendada', sql: solutionSql, best: true, outcome: outcome.variants[1] },
+      ]);
     } finally {
       this.busy.set(undefined);
     }

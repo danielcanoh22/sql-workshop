@@ -1,7 +1,7 @@
 import { Component, input, output, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { EngineStatus, SqlEngineService } from '../../../core/sql/sql-engine.service';
-import { CheckOutcome, SqlResultSet, SqlRunOutcome } from '../../../core/sql/sql.model';
+import { CheckOutcome, CompareOutcome, SqlResultSet, SqlRunOutcome } from '../../../core/sql/sql.model';
 import { SqlEditor } from '../ui/sql-editor';
 import { SqlChallenge } from './sql-challenge';
 
@@ -36,6 +36,7 @@ function setup(check: CheckOutcome, props: object = PROPS) {
     schema: vi.fn().mockResolvedValue({ tables: [] }),
     run: vi.fn().mockResolvedValue(run),
     check: vi.fn().mockResolvedValue(check),
+    compare: vi.fn(),
   };
   TestBed.configureTestingModule({ providers: [{ provide: SqlEngineService, useValue: engine }] });
   TestBed.overrideComponent(SqlChallenge, { remove: { imports: [SqlEditor] }, add: { imports: [FakeEditor] } });
@@ -75,6 +76,31 @@ describe('SqlChallenge', () => {
     const verdict = root.querySelector('.verdict')!;
     expect(verdict.classList).toContain('verdict--correct');
     expect(verdict.textContent).toContain('¡Correcto!');
+  });
+
+  it('offers comparing a correct answer with the recommended solution', async () => {
+    const { root, engine, editor, click } = setup(CORRECT, { ...PROPS, setupSql: 'SELECT 2' });
+    const compared: CompareOutcome = {
+      variants: ['answer', 'solution'].map((id) => ({ id, run: { ok: true, durationMs: 1, results: [] }, sameResultAsFirst: true })),
+    };
+    engine.compare.mockResolvedValue(compared);
+
+    expect(root.querySelector('.verdict__compare-solution')).toBeNull();
+    editor().codeChange.emit('SELECT mine');
+    await click('.challenge__check');
+    await click('.verdict__compare-solution');
+
+    expect(engine.compare).toHaveBeenCalledWith(
+      [
+        { id: 'answer', sql: 'SELECT mine' },
+        { id: 'solution', sql: PROPS.solutionSql },
+      ],
+      'SELECT 2',
+    );
+    expect([...root.querySelectorAll('app-comparison-view .variant__label')].map((l) => l.textContent?.trim())).toEqual([
+      'Tu solución',
+      'Solución recomendada',
+    ]);
   });
 
   it('explains a wrong answer and shows its result next to the expected one', async () => {

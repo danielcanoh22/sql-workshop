@@ -1,0 +1,93 @@
+<div class="variants">
+  @for (item of items(); track $index; let i = $index) {
+    <article class="variant" [class.variant--best]="item.best">
+      <header class="variant__header">
+        <h3 class="variant__label">{{ item.label }}</h3>
+        @if (item.best) {
+          <span class="variant__best">
+            <span class="material-symbols-outlined" aria-hidden="true">verified</span>Recomendada
+          </span>
+        }
+      </header>
+
+      @if (!item.outcome.run.ok) {
+        <app-result-view [outcome]="item.outcome.run" [sql]="item.sql" />
+      } @else {
+        <dl class="metrics">
+          <div class="metric" data-metric="same">
+            <dt>Resultado</dt>
+            <dd class="metric__value" [class.metric__value--bad]="i > 0 && !item.outcome.sameResultAsFirst">
+              {{ sameLabel(i, item) }}
+            </dd>
+          </div>
+          <div class="metric" data-metric="rows">
+            <dt>Filas devueltas</dt>
+            <dd class="metric__value">{{ rowsReturned(item) ?? '—' }}</dd>
+          </div>
+          @if (item.outcome.plan; as plan) {
+            <div class="metric" data-metric="scanned">
+              <dt>Filas leídas</dt>
+              <dd class="metric__value">{{ plan.rowsScanned }}</dd>
+            </div>
+            <div class="metric metric--wide" data-metric="pages">
+              <dt>Páginas leídas <small>(8 kB)</small></dt>
+              <dd class="metric__value">{{ plan.pagesRead }}</dd>
+              <div class="metric__bar" aria-hidden="true">
+                <div class="metric__bar-fill" [style.width]="barWidth(plan.pagesRead)"></div>
+              </div>
+            </div>
+            <div class="metric" data-metric="time">
+              <dt>Tiempo <small>(orientativo)</small></dt>
+              <dd class="metric__value">{{ formatMs(plan.executionTimeMs) }}</dd>
+            </div>
+            <div class="metric metric--wide" data-metric="access">
+              <dt>Acceso a los datos</dt>
+              <dd class="metric__value">
+                @for (scan of plan.scanTypes; track scan) {
+                  <span class="scan" [class]="'scan ' + scanClass(scan)">{{ scan }}</span>
+                } @empty {
+                  <span class="scan scan--other">Sin lectura de tablas</span>
+                }
+              </dd>
+            </div>
+          }
+        </dl>
+
+        @if (item.outcome.plan; as plan) {
+          <details class="plan">
+            <summary>Ver plan de ejecución</summary>
+            <ul class="plan__tree">
+              <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: plan.root }" />
+            </ul>
+          </details>
+        }
+      }
+
+      @if (item.explanationHtml) {
+        <div class="variant__explanation" [innerHTML]="item.explanationHtml"></div>
+      }
+    </article>
+  }
+</div>
+
+<ng-template #nodeTemplate let-node>
+  <li>
+    <span class="plan__node" [class]="'plan__node ' + scanClass(node.nodeType)">{{ nodeText(node) }}</span>
+    @if (node.indexCond) {
+      <span class="plan__detail">Condición del índice: {{ node.indexCond }}</span>
+    }
+    @if (node.filter) {
+      <span class="plan__detail">Filtro: {{ node.filter }}</span>
+      @if (node.rowsRemovedByFilter) {
+        <span class="plan__detail plan__detail--warn">{{ node.rowsRemovedByFilter }} filas leídas y descartadas</span>
+      }
+    }
+    @if (node.children.length) {
+      <ul>
+        @for (child of node.children; track $index) {
+          <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: child }" />
+        }
+      </ul>
+    }
+  </li>
+</ng-template>

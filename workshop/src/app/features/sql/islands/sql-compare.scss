@@ -1,0 +1,99 @@
+:host {
+  display: block;
+  margin: 1.25rem 0;
+}
+
+.compare {
+  border: 1px solid color-mix(in srgb, var(--mat-sys-tertiary) 45%, var(--mat-sys-outline-variant));
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-surface-raised);
+  overflow: hidden;
+}
+
+.compare__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem 0.5rem 0.85rem;
+  background: color-mix(in srgb, var(--mat-sys-tertiary) 14%, var(--mat-sys-surface-container));
+}
+
+.compare__icon {
+  color: var(--mat-sys-tertiary);
+}
+
+.compare__title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.compare__kicker {
+  margin-right: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mat-sys-tertiary);
+}
+
+.compare__run {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.85rem 0.3rem 0.55rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--mat-sys-tertiary);
+  color: var(--mat-sys-on-tertiary);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 1.1rem;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.compare__queries {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+}
+
+.compare__query {
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  & + & {
+    border-left: 1px solid var(--mat-sys-outline-variant);
+  }
+}
+
+.compare__variant-label {
+  margin: 0;
+  padding: 0.4rem 0.85rem 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.compare__results {
+  padding: 0.75rem 0.85rem 0.85rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.compare__prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  font-size: 0.88rem;
+  color: var(--mat-sys-on-surface-variant);
+}

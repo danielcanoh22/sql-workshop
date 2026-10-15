@@ -110,3 +110,8 @@ button {
   letter-spacing: 0.06em;
   color: var(--mat-sys-on-surface-variant);
 }
+
+.verdict__compare-solution {
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
