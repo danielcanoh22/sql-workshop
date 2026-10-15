@@ -1,4 +1,5 @@
 import { COMING_SOON } from './manifests/coming-soon.manifests';
+import { ORDER_LIMIT } from './manifests/order-limit.manifest';
 import { RELATIONAL_MODEL } from './manifests/relational-model.manifest';
 import { SELECT_WHERE } from './manifests/select-where.manifest';
 import { TutorialManifest } from './tutorial.model';
@@ -12,6 +13,7 @@ import { TutorialManifest } from './tutorial.model';
 export const TUTORIAL_REGISTRY: readonly TutorialManifest[] = [
   RELATIONAL_MODEL,
   SELECT_WHERE,
+  ORDER_LIMIT,
   ...COMING_SOON,
 ];
 

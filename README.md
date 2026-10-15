@@ -87,6 +87,9 @@ SELECT name FROM customers;
   ```` ```sql setup ```` runs before all variants (e.g. `generate_series` to make the data large enough to matter);
   ```` ```sql variant-setup ```` prepares only the next variant (e.g. `CREATE INDEX`); each variant runs in a
   transaction that is rolled back. Correct challenge answers can also be compared with the recommended solution.
+  If a variant depends on the ids of rows generated in `setup`, insert them with **explicit ids**: checks and
+  comparisons run on a copy restored from a snapshot, and PostgreSQL sequences jump ahead (they are logged 32
+  values at a time), so generated ids differ from a freshly seeded database.
 - Interactive blocks are "islands": the renderer emits a `data-island` placeholder and `MarkdownView` mounts the
   component registered in `features/sql/islands/sql-islands.ts`.
 - Highlighted languages: `sql`, `json`, `bash`.

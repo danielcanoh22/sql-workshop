@@ -25,12 +25,6 @@ function comingSoon(
 /** Planned syllabus. Each entry becomes its own manifest file once its content exists. */
 export const COMING_SOON: readonly TutorialManifest[] = [
   // Part 1: general SQL
-  comingSoon(3, 'order-limit', 'Ordenar y paginar', 'ORDER BY, LIMIT y OFFSET: así pagina una app', 'beginner', [
-    'ORDER BY',
-    'LIMIT',
-    'OFFSET',
-    'Paginación',
-  ]),
   comingSoon(4, 'aggregates-group-by', 'Agregaciones y GROUP BY', 'Contar, sumar y resumir datos por grupos', 'beginner', [
     'COUNT',
     'SUM',
