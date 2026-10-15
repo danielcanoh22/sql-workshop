@@ -1,4 +1,5 @@
 import { COMING_SOON } from './manifests/coming-soon.manifests';
+import { EXPRESSIONS_FUNCTIONS } from './manifests/expressions-functions.manifest';
 import { TRANSACTIONS } from './manifests/transactions.manifest';
 import { DATA_MODELING } from './manifests/data-modeling.manifest';
 import { TABLES_CONSTRAINTS } from './manifests/tables-constraints.manifest';
@@ -28,6 +29,7 @@ export const TUTORIAL_REGISTRY: readonly TutorialManifest[] = [
   TABLES_CONSTRAINTS,
   DATA_MODELING,
   TRANSACTIONS,
+  EXPRESSIONS_FUNCTIONS,
   ...COMING_SOON,
 ];
 
